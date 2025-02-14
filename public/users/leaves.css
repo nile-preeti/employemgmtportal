@@ -1,0 +1,11 @@
+.card{overflow: hidden;}
+.attendance-record-data-tbl .table thead tr th{background: #ccc !important;}
+.attendance-record-data .date-time-sec{background: #ccc !important;}
+.attendance-record-data h6{margin-bottom: 0px; padding: 12px 0;}
+
+.att-divider{background: #e0e0eb; height: 1px; width: 100%; margin: 20px 0;}
+
+.date-time-sec{    background: #4242da; padding: 16px 20px; color: #fff;}
+.date-time-sec h6{margin-bottom: 0px; padding: 10px;}
+.attendance-record-data h6 span{font-weight: 600; color: #000; }
+ol li{font-size: 48px; color:#000; font-weight:300; }
