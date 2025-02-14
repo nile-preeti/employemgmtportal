@@ -18,3 +18,5 @@ yarn-error.log
 /.idea
 /.vscode
 /_frontend
+public/index.php
+index.php

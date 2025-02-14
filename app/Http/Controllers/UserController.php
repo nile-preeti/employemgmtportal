@@ -9,27 +9,53 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-
         $search = $request->search;
+
         $users = User::when(request()->filled("search"), function ($query) {
-            $keyword = trim(request("search"));
-            return $query->where("name", "LIKE", "%$keyword%")->orWhere("designation", "LIKE", "%$keyword%")->orWhere("email", "LIKE", "%$keyword%")->orWhere("phone", "LIKE", "%$keyword%");
-        })
+                $keyword = trim(request("search"));
+                return $query->where("name", "LIKE", "%$keyword%")
+                    ->orWhere("designation", "LIKE", "%$keyword%")
+                    ->orWhere("email", "LIKE", "%$keyword%")
+                    ->orWhere("phone", "LIKE", "%$keyword%");
+            })
             ->where("role_id", 2)
             ->when(request()->filled("status"), function ($query) {
                 return $query->where("status", request("status"));
             })
+            ->orderBy("id", "desc")
+            ->paginate(config("contant.paginatePerPage"));
 
-            ->orderBy("id", "desc")->paginate(config("contant.paginatePerPage"));
+        // Fetch attendance counts
+        foreach ($users as $user) {
+            $attendance = DB::table('attendances')
+                ->where('user_id', $user->id)
+                ->selectRaw("
+                    SUM(
+                        CASE 
+                            WHEN status = 'Present' THEN 1 
+                            WHEN status = 'Half-day' THEN 0.5 
+                            ELSE 0 
+                        END
+                    ) as total_days_present
+                ")
+                ->first();
+        
+            // If attendance is less than 1, keep decimal, else round to integer
+            $user->total_days_present = ($attendance->total_days_present ?? 0) < 1 
+                ? $attendance->total_days_present 
+                : (int) $attendance->total_days_present;
+        }
+        
 
         $title = "User Management";
 
-        return view("pages.users.index", compact("title", 'users','search'));
+        return view("pages.users.index", compact("title", 'users', 'search'));
     }
     public function store(Request $request)
     {
@@ -111,6 +137,7 @@ class UserController extends Controller
     {
 
         $user = Auth::user();
+        //dd($user);
         // Find today's check-in record
         return view("users.attendance", compact('user'));
     }

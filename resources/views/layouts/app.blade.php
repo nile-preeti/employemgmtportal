@@ -56,21 +56,21 @@
             <div id="sidebar-scrollbar">
                 <nav class="iq-sidebar-menu">
                     <ul id="iq-sidebar-toggle" class="iq-menu">
-                        <li @if (Route::is('dashboard')) class="active" @endif>
-                            <a href="{{ route('dashboard') }}" class="iq-waves-effect"><i class="ri-home-4-line"></i>
+                        <li @if (Route::is('admin.dashboard')) class="active" @endif>
+                            <a href="{{ route('admin.dashboard') }}" class="iq-waves-effect"><i class="ri-home-4-line"></i>
                                 <span>Dashboard</span></a>
                         </li>
 
                         
 
                       
-                        <li @if (Route::is('users.index')) class="active" @endif>
-                            <a href="{{ route('users.index') }}" class="iq-waves-effect">
+                        <li @if (Route::is('admin.users.index')) class="active" @endif>
+                            <a href="{{ route('admin.users.index') }}" class="iq-waves-effect">
                                 <i class="ri-user-settings-line"></i><span>User Management</span></a>
                         </li>
 
-                        <li >
-                            <a href="{{ route('holidayss.index') }}" class="iq-waves-effect">
+                        <li @if (Route::is('admin.holidayss.index')) class="active" @endif>
+                            <a href="{{ route('admin.holidayss.index') }}" class="iq-waves-effect">
                             <i class="ri-calendar-event-line"></i><span>Holidays</span></a>
                         </li>
                       
@@ -132,7 +132,7 @@
                                             <span class="text-white font-size-12">Available</span>
                                         </div>
 
-                                        <a href="{{ route('profile') }}" class="iq-sub-card iq-bg-primary-hover">
+                                        <a href="{{ route('admin.profile') }}" class="iq-sub-card iq-bg-primary-hover">
                                             <div class="media align-items-center">
                                                 <div class="rounded iq-card-icon iq-bg-primary">
                                                     <i class="ri-profile-line"></i>
@@ -144,7 +144,7 @@
                                             </div>
                                         </a>
 
-                                        <a href="{{ route('change_password') }}"
+                                        <a href="{{ route('admin.change_password') }}"
                                             class="iq-sub-card iq-bg-primary-hover">
                                             <div class="media align-items-center">
                                                 <div class="rounded iq-card-icon iq-bg-primary">
@@ -251,7 +251,7 @@
                 confirmButtonText: 'Yes'
             }).then((result) => {
                 if (result.value) {
-                    window.location = "{{ route('logout') }}";
+                    window.location = "{{ route('admin.logout') }}";
 
                 }
 

@@ -19,7 +19,7 @@
             <div class="row">
                 <div class="col-sm-6 col-md-6 col-lg-3">
                     <div class="iq-card iq-card-block iq-card-stretch "
-                        onclick="location.replace('{{ route('users.index') }}')" style="cursor: pointer">
+                        onclick="location.replace('{{ route('admin.users.index') }}')" style="cursor: pointer">
                         <div class="iq-card-body">
                             <div class="d-flex d-flex align-items-center justify-content-between">
                                 <div>
@@ -51,7 +51,7 @@
                                 </form>
 
                                 <div class="form-group mb-0">
-                                        <a class="btn btn-primary iq-bg-primary text-light mr-4" href="{{ route('users.index') }}">
+                                        <a class="btn btn-primary iq-bg-primary text-light mr-4" href="{{ route('admin.users.index') }}">
                                             &nbsp; View All</a>
                                     </div>
                                 <div class="todo-date d-flex mr-3">
@@ -111,12 +111,12 @@
                                                     <div class="flex align-items-center list-user-action">
                                                         <a class="iq-bg-danger" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
-                                                            href="{{ route('userAttendance', $item->id) }}"><i
+                                                            href="{{ route('admin.userAttendance', $item->id) }}"><i
                                                                 class="ri-eye-fill"></i></a>
 
 
                                                     </div>
-
+ 
                                                 </td>
 
                                             </tr>

@@ -56,6 +56,7 @@
                                             <th>email</th>
                                             <th>Designation</th>
                                             <th>Phone No.</th>
+                                            <th>Total Working Days</th>
                                             <th>Status</th>
                                             <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
                                         </tr>
@@ -70,6 +71,7 @@
                                                 <td>{{ $item->email }}</td>
                                                 <td>{{$item->designation ?? 'N/A'}}</td>
                                                 <td>{{$item->phone ?? 'N/A'}}</td>
+                                                <td>{{$item->total_days_present ?? 'N/A'}}</td>
                                                 <td><span
                                                         class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                                 </td>
@@ -83,18 +85,18 @@
                                                             data-designation="{{$item->designation}}"
                                                             data-phone="{{$item->phone}}"
                                                             data-image="{{ $item->image ? asset("uploads/images/$item->image") : null }}"
-                                                            data-url="{{ route('users.update', $item->id) }}"
+                                                            data-url="{{ route('admin.users.update', $item->id) }}"
                                                             onclick="showData(this)" data-target="#EditModel"
                                                             style="cursor: pointer"><i class="ri-pencil-fill"></i></a>
                                                         {{-- delete  button --}}
                                                         <a class="iq-bg-danger" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
-                                                            data-url="{{ route('users.destroy', $item->id) }}"
+                                                            data-url="{{ route('admin.users.destroy', $item->id) }}"
                                                             onclick="deletePublic(this)"><i
                                                                 class="ri-delete-bin-7-line"></i></a>
                                                         <a class="iq-bg-danger" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
-                                                            href="{{ route('userAttendance', $item->id) }}"><i
+                                                            href="{{ route('admin.userAttendance', $item->id) }}"><i
                                                                 class="ri-eye-fill"></i></a>
 
 
@@ -178,7 +180,7 @@
     <div class="modal fade CreateModel" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('users.store') }}" method="post" id="create_form"
+                <form action="{{ route('admin.users.store') }}" method="post" id="create_form"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
@@ -242,7 +244,7 @@
     <div class="modal fade EditModel" tabindex="-1" role="dialog" aria-hidden="true" id="EditModel">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('users.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
+                <form action="{{ route('admin.users.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-header">

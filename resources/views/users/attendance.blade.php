@@ -180,6 +180,7 @@
             document.getElementById("checkinBtn").addEventListener("click", () => startTimer(Date.now()));
 
             let user = @json($user);
+            console.log(user);
             const csrfToken = "{{ csrf_token() }}";
             // Show modal on page load
 
@@ -259,7 +260,8 @@
                         Swal.fire("Success", result.message, "success");
 
                     } else {
-                        alert(result.message);
+                        // alert(result.message);
+                        Swal.fire("Error", result.message, "error");
                     }
                 });
 
@@ -280,7 +282,7 @@
                         // checkoutBtn.disabled = true;
                         Swal.fire("Success", result.message, "success");
                     } else {
-                        alert(result.message);
+                        Swal.fire("Error", result.message, "error");
                     }
                 });
 
@@ -344,7 +346,9 @@
 
             // If user is logged in, proceed with map and buttons
             user = JSON.parse(localStorage.getItem('user'));
+            console.log(user);
             if (user) {
+            
                 getLocation();
                 fetchRecords();
                 $("#name").text(user.name)
