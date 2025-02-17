@@ -56,7 +56,6 @@
                                             <th>email</th>
                                             <th>Designation</th>
                                             <th>Phone No.</th>
-                                            <th>Total Working Days</th>
                                             <th>Status</th>
                                             <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
                                         </tr>
@@ -71,7 +70,6 @@
                                                 <td>{{ $item->email }}</td>
                                                 <td>{{$item->designation ?? 'N/A'}}</td>
                                                 <td>{{$item->phone ?? 'N/A'}}</td>
-                                                <td>{{$item->total_days_present ?? 'N/A'}}</td>
                                                 <td><span
                                                         class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                                 </td>

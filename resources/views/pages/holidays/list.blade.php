@@ -65,7 +65,7 @@
                                                     <a class="iq-bg-primary" data-toggle="modal"
    data-reason="{{ $item->reason ?? '' }}"
    data-date="{{ isset($item->date) ? \Carbon\Carbon::parse($item->date)->format('Y-m-d') : '' }}"
-   data-url="{{ route('holidayss.update', $item->id) }}"
+   data-url="{{ route('admin.holidayss.update', $item->id) }}"
    onclick="showData(this)" data-target="#EditModel"
    style="cursor: pointer">
    <i class="ri-pencil-fill"></i>
@@ -73,7 +73,7 @@
                                                         {{-- delete  button --}}
                                                         <a class="iq-bg-danger" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
-                                                            data-url="{{ route('holidayss.destroy', $item->id) }}"
+                                                            data-url="{{ route('admin.holidayss.destroy', $item->id) }}"
                                                             onclick="deletePublic(this)"><i
                                                                 class="ri-delete-bin-7-line"></i></a>
 
@@ -159,7 +159,7 @@
     <div class="modal fade CreateModel" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('holidayss.store') }}" method="post" id="create_form"
+                <form action="{{ route('admin.holidayss.store') }}" method="post" id="create_form"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
@@ -195,7 +195,7 @@
     <div class="modal fade EditModel" tabindex="-1" role="dialog" aria-hidden="true" id="EditModel">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('holidayss.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
+                <form action="{{ route('admin.holidayss.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-header">

@@ -345,7 +345,7 @@
 
 
             // If user is logged in, proceed with map and buttons
-            user = JSON.parse(localStorage.getItem('user'));
+            user = @json($user);;
             console.log(user);
             if (user) {
             

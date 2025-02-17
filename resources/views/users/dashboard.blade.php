@@ -119,7 +119,10 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
-                        <h2 class="text-dark mb-2 mt-2"><a href="{}" style="font-size: 19px;text-decoration:underline">< Home</a> Dashboard</h2>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="text-dark mb-4 mt-4 pb-0"> Dashboard</h2>
+                            <a href="#" class="btn btn-primary" onclick="logout()">Logout</a>
+                        </div>
                     </div>
                     <!-- <div class="col-md-12">
                         <div class=" d-flex align-items-start">
@@ -300,31 +303,37 @@
                           </div>
                         </div>
                     </div> -->
-                    <div class="col-md-4">
+                    <div class="col-sm-6 col-md-6 col-lg-4 mb-3">
                         <div class="mark-attendance-sec">
+                        <a href="{{ route('user.attendance')}}">
                             <div class="bg-gradient-danger card card-img-holder">
                                 <div class="card-body p-3">
                                   <img src="../public/assets/images/circle.svg" class="card-img-absolute" alt="circle-image">
                                   <div class="row">
                                     <div class="col-8">
                                       <div class="numbers">
+                                      
                                         <p class="text-light text-sm text-uppercase fw-medium">Mark Attendance</p>
-                                        <h3 class="text-light font-weight-bolder pb-0"> 120 </h3>
+                                        <h3 class="text-light font-weight-bolder pb-0"> &nbsp; </h3>
+                                       
                                       </div>
                                     </div>
+                                    
                                     <div class="col-4 text-end align-items-center d-flex justify-content-end">
                                       <div class="ic-dash rounded-circle">
-                                        <img src="https://nileprojects.in/learni/public/assets/images/ic-mark-attendance.png">
+                                        <img src="https://nileprojects.in/hrmodule/public/assets/images/ic-mark-attendance.png">
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                             </div>
+                            </a>
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-sm-6 col-md-6 col-lg-4 mb-3">
                         <div class="mark-attendance-sec">
+                        <a href="{{ route('user.holidays')}}">
                             <div class="bg-gradient-success card card-img-holder">
                                 <div class="card-body p-3">
                                   <img src="../public/assets/images/circle.svg" class="card-img-absolute" alt="circle-image">
@@ -332,17 +341,18 @@
                                     <div class="col-8">
                                       <div class="numbers">
                                         <p class="text-light text-sm text-uppercase fw-medium">Holiday</p>
-                                        <h3 class="text-light font-weight-bolder pb-0"> 50 </h3>
+                                        <h3 class="text-light font-weight-bolder pb-0"> {{ $holidaysCount}} </h3>
                                       </div>
                                     </div>
                                     <div class="col-4 text-end align-items-center d-flex justify-content-end">
                                       <div class="ic-dash rounded-circle">
-                                        <img src="https://nileprojects.in/learni/public/assets/images/ic-holiday.png">
+                                        <img src="https://nileprojects.in/hrmodule/public/assets/images/ic-holiday.png">
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                             </div>
+                          </a>
                         </div>
                     </div>
 
@@ -369,8 +379,9 @@
                         </div>
                     </div> -->
 
-                    <div class="col-md-4">
+                    <div class="col-sm-6 col-md-6 col-lg-4 mb-3">
                         <div class="mark-attendance-sec">
+                          <a href="{{route('user.attendance_records')}}">
                             <div class="bg-gradient-warning card card-img-holder">
                                 <div class="card-body p-3">
                                   <img src="../public/assets/images/circle.svg" class="card-img-absolute" alt="circle-image">
@@ -378,17 +389,43 @@
                                     <div class="col-8">
                                       <div class="numbers">
                                         <p class="text-light text-sm text-uppercase fw-medium">View Attendance</p>
-                                        <h3 class="text-light font-weight-bolder pb-0"> 10 </h3>
+                                        <h3 class="text-light font-weight-bolder pb-0"> &nbsp; </h3>
                                       </div>
                                     </div>
                                     <div class="col-4 text-end align-items-center d-flex justify-content-end">
                                       <div class="ic-dash rounded-circle">
-                                        <img src="https://nileprojects.in/learni/public/assets/images/ic-view-attendace.png">
+                                        <img src="https://nileprojects.in/hrmodule/public/assets/images/ic-view-attendace.png">
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                             </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-md-6 col-lg-4">
+                        <div class="mark-attendance-sec">
+                          <a href="{{route('user.profile')}}">
+                            <div class="bg-gradient-warning card card-img-holder">
+                                <div class="card-body p-3">
+                                  <img src="../public/assets/images/circle.svg" class="card-img-absolute" alt="circle-image">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-light text-sm text-uppercase fw-medium">My Profile</p>
+                                        <h3 class="text-light font-weight-bolder pb-0 opacity-0">0 </h3>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end align-items-center d-flex justify-content-end">
+                                      <div class="ic-dash rounded-circle">
+                                      <img src="https://nileprojects.in/hrmodule/public/assets/images/ic-profile.png">
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                            </a>
                         </div>
                     </div>
 
@@ -424,6 +461,46 @@
 
     </html>
 
+    <script>
+       function logout() {
+
+var title = ' you want to logout ?';
+Swal.fire({
+    title: '',
+    text: title,
+    // iconHtml: '<img src="{{ asset('assets/images/question.png') }}" height="25px">',
+    customClass: {
+        icon: 'no-border'
+    },
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes'
+}).then((result) => {
+    if (result.value) {
+
+        // localStorage.removeItem('user')
+        $.get("{{ route('user.logout') }}", function(data) {
+            if (data.success) {
+                Swal.fire("Success", "Logged out successfully", 'success').then((result) => {
+                    if (result.value) {
+
+                        location.replace("{{ route('user.login') }}");
+
+
+                    }
+                });
+            }
+        })
+
+
+    }
+
+})
+
+}
+    </script>
 
 </body>
 

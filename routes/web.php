@@ -27,7 +27,7 @@ Route::get("/admin/login", [AdminController::class, 'signin'])->name('admin.logi
 Route::post("signin_post", [AdminController::class, 'signin_post'])->name('signin.post');
 
 
-Route::group(['prefix' => 'admin', 'middleware' => 'auth:sanctum'], function () {
+Route::group(['prefix' => 'admin', 'middleware' => 'auth:admin'], function () {
     Route::get("dashboard", [AdminController::class, 'dashboard'])->name("admin.dashboard");
     Route::get("profile", [AdminController::class, 'profile'])->name("admin.profile");
     Route::post("profile_post", [AdminController::class, 'profile_post'])->name("admin.profile_post");
@@ -63,6 +63,7 @@ Route::prefix('user')->as("user.")->group(function () {
         //
         Route::get("attendance_records", [UserController::class, 'attendance_records'])->name("attendance_records");
         Route::get("holidays", [UserController::class, 'holidays'])->name("holidays");
+        Route::get("profile", [UserController::class, 'profile'])->name("profile");
 
         Route::get("logout", [UserController::class, 'logout'])->name("logout");
 

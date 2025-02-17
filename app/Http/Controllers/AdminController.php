@@ -27,33 +27,45 @@ class AdminController extends Controller
         return view("pages.signin");
     }
     public function signin_post(Request $request)
-    {
-        // Validate the request
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|min:6',
-        ], [
-            'email.exists' => "This email is not registered with AVOT."
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+        'password' => 'required|min:6',
+    ], [
+        'email.exists' => "This email is not registered with AVOT."
+    ]);
 
-        try {
+    try {
+        $credentials = $request->only('email', 'password');
+        $user = User::where("email", $request->email)->first();
 
-            // Attempt to authenticate the user
-            if (Auth::attempt($request->only(['email', 'password']))) {
-                $user = User::where("email", $request->email)->first();
-                if ($user->role_id == 1) {
-                    Auth::login($user);
-                    return response()->json(['message' => 'Logged In Successfully. ', 'redirect' => true, 'route' => route("dashboard"), 'status' => 200]);
-                } else {
-                    return response()->json(['message' => 'Unauthorized Access. ', 'status' => 201]);
-                }
-            } else {
-                return response()->json(['message' => 'Invalid credentials', 'status' => 201]);
-            }
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage(), 'status' => 201]);
+        if (!$user || $user->role_id != 1) {
+            return response()->json(['message' => 'Unauthorized Access.', 'status' => 401]);
         }
+
+        if (!Auth::guard('admin')->attempt($credentials)) {
+            return response()->json(['message' => 'Invalid credentials', 'status' => 401]);
+        }
+
+        // Debugging: Check if admin is authenticated
+        if (Auth::guard('admin')->check()) {
+            return response()->json([
+                'message' => 'Login Successful',
+                'status' => 200,
+                'user' => Auth::guard('admin')->user(), // Debugging
+                'redirect' => route('admin.dashboard')
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Auth Failed',
+                'status' => 403
+            ]);
+        }
+
+    } catch (\Throwable $th) {
+        return response()->json(['message' => $th->getMessage(), 'status' => 500]);
     }
+}
     public function profile()
     {
         $admin = auth()->user();
@@ -99,10 +111,10 @@ class AdminController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Password updated successfully']);
     }
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::guard("web")->logout();
-        return redirect(route("admin.login"));
+        Auth::guard('admin')->logout();
+        return redirect()->route('admin.login');
     }
 
     // all functions related to orders listing and order details

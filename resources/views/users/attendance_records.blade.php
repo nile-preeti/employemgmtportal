@@ -44,7 +44,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h2 class="py-4 text-dark mb-2 mt-2">Attendance Record</h2>
+                    <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()" style="font-size: 19px;text-decoration:underline">></a> Attendance Record</h2>
                 </div>
                 <div class="col-md-12 attendance-record-data-tbl">
                     <!-- <div class=" table-responsive ">
@@ -150,7 +150,7 @@
 
 
         // If user is logged in, proceed with map and buttons
-        var user = JSON.parse(localStorage.getItem('user'));
+        var user = @json($user);
         if (user) {
             fetchRecords();
             $("#name").text(user.name)

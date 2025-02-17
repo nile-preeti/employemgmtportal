@@ -108,43 +108,51 @@ class AjaxController extends Controller
             'check_out_longitude' => 'required|string',
             'user_id' => 'required|string',
         ]);
-
+    
         $userId = $request->user_id;
         $today = Carbon::today()->toDateString();
-
+    
         // Find today's attendance record
         $attendance = Attendance::where('user_id', $userId)
             ->where('date', $today)
             ->first();
-
+    
         if (!$attendance) {
             return response()->json([
                 'status' => 'error',
                 'message' => "No check-in record found for today.",
             ], 400);
         }
-
+    
         // If both check-in and check-out times are NULL, update status to "Absent"
         if (!$attendance->check_in_time && !$attendance->check_out_time) {
             $attendance->status = "Absent";
             $attendance->save();
-
+    
             return response()->json([
                 'status' => 'error',
                 'message' => "No check-in and check-out recorded, marked as Absent.",
             ], 400);
         }
-
+    
         // Get check-in time
         $checkInTime = Carbon::parse($attendance->check_in_time);
         $checkOutTime = Carbon::now();
-
+    
         // Calculate worked hours
         $totalHours = $checkInTime->diffInHours($checkOutTime);
-
+        $totalMinutes = $checkInTime->diffInMinutes($checkOutTime);  // Get the difference in minutes for more precision
+        $totalHours = $totalMinutes / 60;  // Convert minutes to hours
+    
         // Determine status based on hours worked
-        $status = $totalHours < 9 ? "Half-day" : "Present";
-
+        if ($totalHours < 4.5) {
+            $status = "Absent";  // Set status as "Absent" if worked hours are less than 4.5
+        } elseif ($totalHours < 9) {
+            $status = "Half-day";  // Set status as "Half-day" if worked hours are less than 9
+        } else {
+            $status = "Present";  // Otherwise, set status as "Present"
+        }
+    
         // Update check-out details
         $attendance->check_out_full_address = $request->check_out_full_address;
         $attendance->check_out_latitude = $request->check_out_latitude;
@@ -152,7 +160,7 @@ class AjaxController extends Controller
         $attendance->check_out_time = $checkOutTime->format('H:i:s');
         $attendance->status = $status;
         $attendance->save();
-
+    
         return response()->json([
             'status' => 'success',
             'message' => 'Check-out recorded successfully.',

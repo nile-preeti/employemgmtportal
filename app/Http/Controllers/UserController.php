@@ -151,35 +151,55 @@ class UserController extends Controller
     }
     public function login_post(Request $request)
     {
-
+        // Validate the input
         $request->validate([
             'password' => 'required',
             'email' => 'required|exists:users,email',
         ]);
+
         $credentials = $request->only('email', 'password');
+        $user = User::where('email', $request->email)->first();
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-
+        // Check if the user exists
+        if ($user) {
+            // If it's a user (role_id != 1)
+            if ($user->role_id != 1) {
+                // Attempt to log in as a regular user
+                if (Auth::guard('web')->attempt($credentials)) {
+                    return response()->json([
+                        'status' => 'success',
+                        'redirect' => true,
+                        'route' => route("user.dashboard"),
+                        'message' => "User logged in successfully",
+                        'user' => $user
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Invalid credentials',
+                    ]);
+                }
+            } 
+            // If it's an admin (role_id == 1), return an error
+            else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthorized access. Admins cannot log in via this portal.',
+                ]);
+            }
+        } else {
             return response()->json([
-                'status' => 'success',
-                'redirect' => true,
-                'route' => route("user.dashboard"),
-                'user' => $user,
-                'message' => "User logged in successfully"
+                'status' => 'error',
+                'message' => 'User not found',
             ]);
         }
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid credentials',
-        ]);
     }
 
     public function attendance_records()
     {
+        $user = Auth::user();
 
-        return view("users.attendance_records");
+        return view("users.attendance_records",compact('user'));
     }
 
     public function holidays()
@@ -196,13 +216,23 @@ class UserController extends Controller
     }
     public function dashboard()
     {
+        $currentYear = Carbon::now()->year;
 
-        return view("users.dashboard");
+        // Count holidays for the current year
+        $holidaysCount = Holiday::whereYear('date', $currentYear)->count();
+
+        return view("users.dashboard",compact('holidaysCount'));
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
         return response()->json(['success' => true]);
+    }
+
+
+    public function profile(Request $request)
+    {
+        return view("users.profile");
     }
 }

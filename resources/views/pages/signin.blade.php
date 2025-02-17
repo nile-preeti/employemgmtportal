@@ -142,8 +142,8 @@
 
                                 }).then((result) => {
 
-                                    if (response.redirect == true) {
-                                        window.location = response.route;
+                                    if (response.redirect) {
+                                        window.location.href = response.redirect; 
                                     }
                                     // var url = $('#redirect_url').val();
                                     // if (url !== undefined || url != null) {
