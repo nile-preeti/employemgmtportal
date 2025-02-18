@@ -18,12 +18,12 @@ class UserController extends Controller
         $search = $request->search;
 
         $users = User::when(request()->filled("search"), function ($query) {
-                $keyword = trim(request("search"));
-                return $query->where("name", "LIKE", "%$keyword%")
-                    ->orWhere("designation", "LIKE", "%$keyword%")
-                    ->orWhere("email", "LIKE", "%$keyword%")
-                    ->orWhere("phone", "LIKE", "%$keyword%");
-            })
+            $keyword = trim(request("search"));
+            return $query->where("name", "LIKE", "%$keyword%")
+                ->orWhere("designation", "LIKE", "%$keyword%")
+                ->orWhere("email", "LIKE", "%$keyword%")
+                ->orWhere("phone", "LIKE", "%$keyword%");
+        })
             ->where("role_id", 2)
             ->when(request()->filled("status"), function ($query) {
                 return $query->where("status", request("status"));
@@ -45,13 +45,13 @@ class UserController extends Controller
                     ) as total_days_present
                 ")
                 ->first();
-        
+
             // If attendance is less than 1, keep decimal, else round to integer
-            $user->total_days_present = ($attendance->total_days_present ?? 0) < 1 
-                ? $attendance->total_days_present 
+            $user->total_days_present = ($attendance->total_days_present ?? 0) < 1
+                ? $attendance->total_days_present
                 : (int) $attendance->total_days_present;
         }
-        
+
 
         $title = "User Management";
 
@@ -63,7 +63,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required| unique:users,email',
             'password' => 'required',
-            'designation'=> 'required',
+            'designation' => 'required',
             'phone' => 'required',
 
 
@@ -89,7 +89,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|exists:users,email',
-            'designation'=> 'required',
+            'designation' => 'required',
             'phone' => 'required',
 
 
@@ -123,14 +123,37 @@ class UserController extends Controller
     // user end routes
     public function userAttendance($id)
     {
-        $data = Attendance::where('user_id', $id)
-            ->when(request()->has("status"), function ($query) {
-                return $query->where("status", request("status"));
-            })
-            ->orderBy("id", "desc")
-            ->paginate(10);
+        $query = Attendance::where('user_id', $id);
+
+        // Get the selected month or use the current month by default
+        $month = request('month', date('m'));
+        $year = request('year', date('Y'));
+
+        // Filter by month and year
+        $query->whereMonth('date', $month)->whereYear('date', $year);
+
+        // Apply status filter
+        if (request()->has("status")) {
+            $query->where("status", request("status"));
+        }
+
+        // Paginate attendance records
+        $data = $query->orderBy("id", "desc")->paginate(10);
+
+        // Calculate total working days for the current or selected month
+        $totalWorkingDays = Attendance::where('user_id', $id)
+                            ->whereMonth('date', $month)
+                            ->whereYear('date', $year)
+                            ->whereIn('status', ['Present', 'Half-day']) // Ensure correct status value
+                            ->selectRaw("SUM(CASE WHEN status = 'Present' THEN 1 WHEN status = 'Half-day' THEN 0.5 ELSE 0 END) as total_days")
+                            ->value('total_days');
+        // dd($totalWorkingDays);
+
+        $totalWorkingDays = $totalWorkingDays ?? 0; // Default to 0 if null
+
         $title = "Employee attendance records";
-        return view("pages.users.attendance", compact("data", 'title'));
+
+        return view("pages.users.attendance", compact("data", "title", "totalWorkingDays"));
     }
 
     public function attendance()
@@ -179,7 +202,7 @@ class UserController extends Controller
                         'message' => 'Invalid credentials',
                     ]);
                 }
-            } 
+            }
             // If it's an admin (role_id == 1), return an error
             else {
                 return response()->json([
@@ -199,7 +222,7 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        return view("users.attendance_records",compact('user'));
+        return view("users.attendance_records", compact('user'));
     }
 
     public function holidays()
@@ -221,7 +244,7 @@ class UserController extends Controller
         // Count holidays for the current year
         $holidaysCount = Holiday::whereYear('date', $currentYear)->count();
 
-        return view("users.dashboard",compact('holidaysCount'));
+        return view("users.dashboard", compact('holidaysCount'));
     }
 
     public function logout(Request $request)

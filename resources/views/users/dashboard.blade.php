@@ -56,6 +56,8 @@
         <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('style.css') }}">
         <link rel="stylesheet" href="{{ asset('users/attendance_records.css') }}">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
 
         <style>
             body {
@@ -101,13 +103,18 @@
 
             .date-time-sec h2 {color: #000 !important;}
 
-            .bg-gradient-danger{background-image: linear-gradient(310deg, #f5365c, #f56036);}
-            .bg-gradient-success{background-image: linear-gradient(310deg,#2dce89,#2dcecc);}
-            .bg-gradient-warning{background-image: linear-gradient(310deg, #fb6340, #fbb140);}
+            .bg-gradient-danger{background-image: linear-gradient(310deg, #ff315a, #f56036);}
+            .bg-gradient-success{background-image: linear-gradient(310deg, #54f9b2, #2dcecc);}
+            .bg-gradient-warning{background-image: linear-gradient(310deg, #fa613e, #ffb33e);}
+/*            .bg-gradient-warning{background-image: linear-gradient(310deg, #00a1ff, #60c4ff);}*/
+            
             .ic-dash img{height: 80px; background: #fff; padding: 14px; border-radius: 12px;}
             .card.card-img-holder {position: relative;}
             .card.card-img-holder .card-img-absolute {position: absolute; top: -170px; right: -14px; height: 440px;}
-
+            .header {background:#064086; }
+            .header img.logo {background: #fff; padding: 8px; border-radius: 6px;}
+            .dropdown-toggle::after{color: #fff;}
+            .profile-image{border: 2px solid #4183d1;}
 
         </style>
 
@@ -115,13 +122,52 @@
     </head>
 
     <body>
+    <!-- <div class="header">
+        <nav class="navbar">
+            <div class="navbar-menu-wrapper" style="cursor: pointer;">
+                <ul class="navbar-nav f-navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link nav-toggler" data-toggle="minimize">
+                        <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="card-img-absolute" alt="circle-image" height="50px">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div> -->
+    <header class="header py-2">
+        <div class="container-fluid">
+          <div class="d-flex flex-wrap align-items-center justify-content-between">
+            
+            <a href="#"> <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="logo card-img-absolute" alt="circle-image" height="50px"></a>
+
+           
+
+
+            <div class="dropdown text-end">
+              <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image"> 
+                <h6 class="m-0 p-0 text-light"> &nbsp; Profile</h6>
+              </a>
+              <ul class="dropdown-menu text-small" style="">
+                <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item " href="#" onclick="logout()">Sign out</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+
+
         <div>
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2 class="text-dark mb-4 mt-4 pb-0"> Dashboard</h2>
-                            <a href="#" class="btn btn-primary" onclick="logout()">Logout</a>
+                            <a href="#" class="btn btn-primary d-none" onclick="logout()">Logout</a>
                         </div>
                     </div>
                     <!-- <div class="col-md-12">
@@ -308,7 +354,7 @@
                         <a href="{{ route('user.attendance')}}">
                             <div class="bg-gradient-danger card card-img-holder">
                                 <div class="card-body p-3">
-                                  <img src="../public/assets/images/circle.svg" class="card-img-absolute" alt="circle-image">
+                                  <img src="../public/assets/images/circle.svg" class="profile-img card-img-absolute" alt="circle-image">
                                   <div class="row">
                                     <div class="col-8">
                                       <div class="numbers">
@@ -404,9 +450,9 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-6 col-md-6 col-lg-4">
+                    <div class="col-sm-6 col-md-6 col-lg-4 d-none">
                         <div class="mark-attendance-sec">
-                          <a href="{{route('user.profile')}}">
+                          <a href="">
                             <div class="bg-gradient-warning card card-img-holder">
                                 <div class="card-body p-3">
                                   <img src="../public/assets/images/circle.svg" class="card-img-absolute" alt="circle-image">

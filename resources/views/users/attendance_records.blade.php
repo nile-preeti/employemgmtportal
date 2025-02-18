@@ -36,15 +36,106 @@
             font-size: 13px;
             margin-top: 5px;
         }
+
+        #pagination-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #pagination-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin: 0 10px;
+        }
+
+        #pagination-controls button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        #pagination-controls button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #page-info {
+            font-size: 16px;
+            margin: 0 20px;
+            color: #333;
+        }
+
+        .header {
+            background: #064086;
+        }
+
+        .header img.logo {
+            background: #fff;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .dropdown-toggle::after {
+            color: #fff;
+        }
+
+        .profile-image {
+            border: 2px solid #4183d1;
+        }
     </style>
 </head>
 
 <body>
+    <header class="header py-2">
+        <div class="container-fluid">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+
+                <a href="#"> <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="logo card-img-absolute" alt="circle-image" height="50px"></a>
+
+
+
+
+                <div class="dropdown text-end">
+                    <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image">
+                        <h6 class="m-0 p-0 text-light"> &nbsp; Profile</h6>
+                    </a>
+                    <ul class="dropdown-menu text-small" style="">
+                        <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
     <div>
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()" style="font-size: 19px;text-decoration:underline">></a> Attendance Record</h2>
+                    <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()" style="font-size: 19px;text-decoration:underline">
+                            < Home</a> Attendance Record</h2>
+                </div>
+                <div class="row">
+                    <ol id="recordsList" style="padding-left: 50px;">
+                        <!-- Dynamic content will be added here by the JavaScript -->
+                    </ol>
+
+                    <div id="pagination-controls" class="d-flex justify-content-end">
+                        <button id="prev-page" onclick="changePage('prev')" disabled>Previous</button>
+                        <span id="page-info"></span>
+                        <button id="next-page" onclick="changePage('next')">Next</button>
+                    </div>
                 </div>
                 <div class="col-md-12 attendance-record-data-tbl">
                     <!-- <div class=" table-responsive ">
@@ -92,7 +183,7 @@
                     </div> -->
                     <!-- Table 1 - Bootstrap Brain Component -->
 
-                    <div class="table-responsive" id="recordsTable">
+                    <!-- <div class="table-responsive" id="recordsTable">
                         <table class="table table-borderless bsb-table-xl text-nowrap align-middle m-0">
                             <thead>
                                 <tr>
@@ -114,7 +205,7 @@
 
                             </tbody>
                         </table>
-                    </div>
+                    </div> -->
 
                 </div>
             </div>
@@ -122,54 +213,114 @@
         </div>
     </div>
     <script>
-        // Display Records
+        let currentPage = 1;
+        let lastPage = 1;
+
+        // Function to display records
         function displayRecords(records) {
-            const recordsTableBody = document.querySelector("#recordsTable tbody");
-            recordsTableBody.innerHTML = "";
+            const recordsList = document.querySelector("#recordsList");
+            recordsList.innerHTML = ""; // Clear previous records
 
-            records.forEach((record, index) => {
-                console.log(record);
+            records.forEach((record) => {
+                const listItem = document.createElement("li");
+                listItem.classList.add("mt-4");
 
-                const row1 = document.createElement("tr");
-                row1.innerHTML = `
-                          <td>${index+1}</td>
-                                    <td>${record.date}</td>
-                                    <td>${record.check_in_time} </td>
-                                    <td>${record.check_in_full_address}</td>
-                                    <td>${record.check_out_time}</td>
-                                    <td>${record.check_out_full_address}</td>
+                const formatTime = (time) => time ? new Date(`1970-01-01T${time}:00`).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : "N/A";
+                const formatAddress = (address) => address || "N/A";
 
-                           
-                        `;
-                recordsTableBody.appendChild(row1);
-
-
+                listItem.innerHTML = `
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="d-flex justify-content-between date-time-sec">
+                            <h6>Date : ${new Date(record.date).toLocaleDateString('en-GB')}</h6>
+                        </div>
+                        <div class="card-body py-2 px-2">
+                            <div class="attendance-record-data">
+                                <div class="d-md-flex justify-content-md-between">
+                                    <div>
+                                        <h6> Check-in Time : <span>${formatTime(record.check_in_time)}</span></h6>
+                                        <h6> Address : <span>${formatAddress(record.check_in_full_address)}</span></h6>
+                                    </div>
+                                    <div>
+                                        <div class="d-md-flex justify-content-md-end">
+                                            <h6> Check-out Time : <span>${formatTime(record.check_out_time)}</span></h6>
+                                        </div>
+                                        <div class="d-md-flex justify-content-md-end">
+                                            <h6> Address : <span>${formatAddress(record.check_out_full_address)}</span></h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+                recordsList.appendChild(listItem);
             });
         }
 
+        // Function to update pagination controls
+        function updatePaginationControls(total, currentPage, lastPage) {
+            const paginationControls = document.getElementById("pagination-controls");
+            const pageInfo = document.getElementById("page-info");
+            const prevButton = document.getElementById("prev-page");
+            const nextButton = document.getElementById("next-page");
 
+            pageInfo.textContent = `Page ${currentPage} of ${lastPage}`;
 
-        // If user is logged in, proceed with map and buttons
-        var user = @json($user);
-        if (user) {
-            fetchRecords();
-            $("#name").text(user.name)
-        } else {
-            window.location = "{{ route('user.dashboard') }}";
+            prevButton.disabled = currentPage <= 1;
+            nextButton.disabled = currentPage >= lastPage;
+
+            // Hide pagination if there's only one page
+            if (lastPage <= 1) {
+                paginationControls.style.setProperty('display', 'none', 'important');
+            } else {
+                paginationControls.style.setProperty('display', 'flex', 'important');
+            }
         }
 
-        function fetchRecords() {
-            $.get("{{ route('user.attendance.fetch') }}" + "?id=" + user.id, function(data) {
+        // Function to change the page
+        function changePage(direction) {
+            if (direction === 'prev' && currentPage > 1) {
+                currentPage--;
+            } else if (direction === 'next' && currentPage < lastPage) {
+                currentPage++;
+            }
+
+            fetchRecords(currentPage); // Fetch records for the updated page
+        }
+
+        // Function to fetch attendance records for a specific page
+        function fetchRecords(page = 1) {
+            $.get("{{ route('user.attendance.fetch') }}", {
+                id: user.id,
+                page: page
+            }, function(data) {
                 if (data.success) {
                     if (data.records) {
-
-                        displayRecords(data.records);
+                        displayRecords(data.records); // Display the records
+                        currentPage = data.current_page; // Update current page
+                        lastPage = data.last_page; // Update last page
+                        updatePaginationControls(data.total, currentPage, lastPage); // Update pagination controls
                     }
-
                 }
             });
         }
+
+        // Check if user is logged in and fetch records
+        var user = @json($user);
+        if (user) {
+            fetchRecords(); // Fetch records for the first page
+            $("#name").text(user.name); // Display user name
+        } else {
+            window.location = "{{ route('user.dashboard') }}";
+        }
     </script>
+
+
 </body>
 
 </html>
