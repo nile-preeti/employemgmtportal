@@ -30,13 +30,17 @@
                                         <select class="form-control" id="selectcountry"
                                             onchange="changeStatus(this.value)">
                                             <option value="">--Filter By Status--</option>
-                                            <option value="Checked In"
-                                                @if (request()->has('status') && request('status') == 'Checked In') selected @endif>
-                                                Checked In </option>
+                                            <option value="Present"
+                                                @if (request()->has('status') && request('status') == 'Present') selected @endif>
+                                                Present </option>
 
-                                            <option value="Checked Out"
-                                                @if (request()->has('status') && request('status') == 'Checked Out') selected @endif>
-                                                Checked Out </option>
+                                            <option value="Absent"
+                                                @if (request()->has('status') && request('status') == 'Absent') selected @endif>
+                                                Absent </option>
+
+                                                <option value="Half-day"
+                                                @if (request()->has('status') && request('status') == 'Half-day') selected @endif>
+                                                Half-day </option>
 
                                         </select>
 
@@ -77,11 +81,10 @@
                                             src="{{ asset('reset.png') }}" height="20" alt=""></span>
                                 </div>
                             </div>
-                            <table id="user-list-table" class="table table-striped table-borderless mt-4" role="grid"
-                                aria-describedby="user-list-page-info">
+                            <table id="user-list-table" class="table table-striped table-borderless mt-4">
                                 <thead>
                                     <tr>
-                                        <th> Date</th>
+                                        <th>Date</th>
                                         <th>Check In Time</th>
                                         <th>Check In Location</th>
                                         <th>Check Out Time</th>
@@ -90,79 +93,74 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($data as $item)
+                                    @forelse ($allDaysPaginated as $item)
                                     <tr>
-                                    <td>{{ $item->date ? date('Y-m-d', strtotime($item->date)) : 'N/A' }}</td>
-                                    <td>{{ $item->check_in_time ?? 'N/A' }}</td>
-                                    <td>{{ $item->check_in_full_address ? substr($item->check_in_full_address, 0, 30) : 'N/A' }}</td>
-                                    <td>{{ $item->check_out_time ?? 'N/A' }}</td>
-                                    <td>{{ $item->check_out_full_address ? substr($item->check_out_full_address, 0, 30) : 'N/A' }}</td>
-                                    <td>{{ $item->status ?? 'N/A' }}</td>
-
-
+                                        <td>{{ date('Y-m-d', strtotime($item['date'])) }}</td>
+                                        <td>{{ $item['check_in_time'] ?? 'N/A' }}</td>
+                                        <td>{{ $item['check_in_full_address'] ? substr($item['check_in_full_address'], 0, 30) : 'N/A' }}</td>
+                                        <td>{{ $item['check_out_time'] ?? 'N/A' }}</td>
+                                        <td>{{ $item['check_out_full_address'] ? substr($item['check_out_full_address'], 0, 30) : 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {{ $item['status'] == 'Absent' ? 'bg-danger' : 'iq-bg-primary' }}">
+                                                {{ is_array($item['status']) ? 'Present' : $item['status'] }}
+                                            </span>
+                                        </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" align="center">No records found</td>
+                                        <td colspan="6" align="center">No records found</td>
                                     </tr>
                                     @endforelse
-
-
-
                                 </tbody>
                             </table>
                         </div>
-                        <div class="d-flex justify-content-end">
-                            <p><b>Total Working Days - {{ $totalWorkingDays }}</b></p>
+                        <div class="d-flex justify-content-end mt-3">
+                            <p><b>Total Working Days: {{ $totalWorkingDays }}</b></p>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <p><b>Total Present: {{ $totalPresent }}</b></p>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <p><b>Total Absent: {{ $totalAbsent }}</b></p>
                         </div>
                         <div class="row justify-content-between mt-3">
                             <div id="user-list-page-info" class="col-md-6">
                                 {{-- <span>Showing 1 to 5 of 5 entries</span> --}}
                             </div>
+
                             <div class="col-md-6">
                                 <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-end mb-0">
-                                        @if ($data->onFirstPage())
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#" tabindex="-1"
-                                                aria-disabled="true">Previous</a>
-                                        </li>
+                                        {{-- Previous Button --}}
+                                        @if ($allDaysPaginated->onFirstPage())
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                                            </li>
                                         @else
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $data->previousPageUrl() }}">Previous</a>
-                                        </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ $allDaysPaginated->previousPageUrl() }}">Previous</a>
+                                            </li>
                                         @endif
 
-                                        @foreach ($data->links()->elements as $element)
-                                        @if (is_string($element))
-                                        <li class="page-item disabled"><a
-                                                class="page-link">{{ $element }}</a></li>
-                                        @endif
-
-                                        @if (is_array($element))
-                                        @foreach ($element as $page => $url)
-                                        @if ($page == $data->currentPage())
-                                        <li class="page-item active"><a class="page-link"
-                                                href="{{ $url }}">{{ $page }}</a>
-                                        </li>
-                                        @else
-                                        <li class="page-item"><a class="page-link"
-                                                href="{{ $url }}">{{ $page }}</a>
-                                        </li>
-                                        @endif
-                                        @endforeach
-                                        @endif
+                                        {{-- Page Numbers --}}
+                                        @foreach ($allDaysPaginated->links()->elements[0] ?? [] as $page => $url)
+                                            @if ($page == $allDaysPaginated->currentPage())
+                                                <li class="page-item active"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                            @else
+                                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                            @endif
                                         @endforeach
 
-                                        @if ($data->hasMorePages())
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $data->nextPageUrl() }}">Next</a>
-                                        </li>
+                                        {{-- Next Button --}}
+                                        @if ($allDaysPaginated->hasMorePages())
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ $allDaysPaginated->nextPageUrl() }}">Next</a>
+                                            </li>
                                         @else
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#" tabindex="-1"
-                                                aria-disabled="true">Next</a>
-                                        </li>
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                                            </li>
                                         @endif
                                     </ul>
                                 </nav>

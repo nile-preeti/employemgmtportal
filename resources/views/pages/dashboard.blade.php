@@ -16,20 +16,41 @@
 @section('content')
     <div id="content-page" class="content-page">
         <div class="container-fluid">
-            <div class="row">
+            <div class="row d-flex">
                 <div class="col-sm-6 col-md-6 col-lg-3">
                     <div class="iq-card iq-card-block iq-card-stretch "
                         onclick="location.replace('{{ route('admin.users.index') }}')" style="cursor: pointer">
                         <div class="iq-card-body">
                             <div class="d-flex d-flex align-items-center justify-content-between">
                                 <div>
-                                    <h6 class="text-dark font-weight-normal">Total Users</h6>
+                                    <h6 class="text-dark font-weight-normal">Total Employee</h6>
                                     <h2 class="text-dark font-weight-bold">{{ count($users) }}</h2>
                                 </div>
                                 <div class="rounded-circle iq-card-icon dark-icon-light iq-bg-primary "><i
                                         class="ri-group-line"></i></div>
                             </div>
                         </div>
+
+                        
+                    </div>
+                </div>
+
+
+                <div class="col-sm-6 col-md-6 col-lg-3">
+                    <div class="iq-card iq-card-block iq-card-stretch "
+                        onclick="location.replace('{{ route('admin.holidayss.index') }}')" style="cursor: pointer">
+                        <div class="iq-card-body">
+                            <div class="d-flex d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="text-dark font-weight-normal">Total Holidays</h6>
+                                    <h2 class="text-dark font-weight-bold">{{ $totalHolidays }}</h2>
+                                </div>
+                                <div class="rounded-circle iq-card-icon dark-icon-light iq-bg-primary "><i
+                                        class="ri-group-line"></i></div>
+                            </div>
+                        </div>
+
+                        
                     </div>
                 </div>
 
@@ -39,7 +60,7 @@
                     <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
                         <div class="iq-card-header d-flex justify-content-between">
                             <div class="iq-header-title">
-                                <h4 class="card-title">User Attendance</h4>
+                                <h4 class="card-title">Employee List</h4>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <form class="position-relative mr-5">
@@ -85,7 +106,6 @@
                                             <th>Designation</th>
                                             <th>Phone No.</th>
                                             <th>Status</th>
-                                            <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -105,18 +125,6 @@
                                                 <td>{{$item->phone ?? 'N/A'}}</td>
                                                 <td><span
                                                         class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
-                                                </td>
-
-                                                <td>
-                                                    <div class="flex align-items-center list-user-action">
-                                                        <a class="iq-bg-danger" data-id="{{ $item->id }}"
-                                                            style="cursor: pointer"
-                                                            href="{{ route('admin.userAttendance', $item->id) }}"><i
-                                                                class="ri-eye-fill"></i></a>
-
-
-                                                    </div>
- 
                                                 </td>
 
                                             </tr>

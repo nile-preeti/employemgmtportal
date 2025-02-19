@@ -42,7 +42,7 @@
                             <form class="mt-4" id="signin_form" enctype="multipart/form-data" action="{{route('signin.post')}}" method="POST">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Registration Email ID</label>
+                                    <label for="exampleInputEmail1">Email ID</label>
                                     <input type="email" name="email" class="form-control mb-0" id="exampleInputEmail1" placeholder="Enter email">
                                 </div>
                                 <div class="form-group">

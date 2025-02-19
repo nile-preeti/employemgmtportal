@@ -126,11 +126,6 @@
                                     < Home</a>
                             </div>
                         </div>
-                        <div style="display: flex;justify-content:space-between">
-                            <h5>Name: <span id="name"></span></h5>
-                            <div class="text-center"><Button class="btn btn-danger"
-                                    onclick="logout()">Logout</Button></div>
-                        </div>
                         <div class="punching-time">
                             <span id="hours">00</span>:<span id="minutes">00</span>:<span
                                 id="seconds">00</span>
@@ -143,19 +138,6 @@
                             <div class="punching-btn">
                                 <button id="checkoutBtn" class="checkoutBtn" disabled>Check-out</button>
                                 <div class="info" id="checkoutInfo"></div>
-                            </div>
-                        </div>
-                        <div class="hrmodule-punching-item-action">
-                            <div class="punching-btn">
-                                <a href="{{ route('user.attendance_records') }}"
-                                    style="text-decoration: underline">User
-                                    Attendance</a>
-
-                            </div>
-                            <div class="punching-btn">
-                                <a href="{{ route('user.holidays') }}"
-                                    style="text-decoration: underline">Holidays</a>
-
                             </div>
                         </div>
                     </div>
@@ -449,7 +431,7 @@
 
         function logout() {
 
-            var title = ' you want to logout ?';
+            var title = 'Are you sure, you want to logout ?';
             Swal.fire({
                 title: '',
                 text: title,

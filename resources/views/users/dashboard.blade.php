@@ -166,7 +166,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="text-dark mb-4 mt-4 pb-0"> Dashboard</h2>
+                            <h2 class="text-dark mb-4 mt-4 pb-0"> Welcome {{ auth()->user()->name }}</h2>
                             <a href="#" class="btn btn-primary d-none" onclick="logout()">Logout</a>
                         </div>
                     </div>
@@ -510,7 +510,7 @@
     <script>
        function logout() {
 
-var title = ' you want to logout ?';
+var title = 'Are you sure, you want to logout ?';
 Swal.fire({
     title: '',
     text: title,

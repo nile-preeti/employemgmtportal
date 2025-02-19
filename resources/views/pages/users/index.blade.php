@@ -44,14 +44,15 @@
 
                                             <a class="iq-bg-primary"
                                                 onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
-                                                data-toggle="modal" data-target=".CreateModel" href="#">Create</a>
+                                                data-toggle="modal" data-target=".CreateModel" href="#">Add Employee</a>
                                         </div>
                                     </div>
                                 </div>
-                                <table id="user-list-table" class="table table-striped table-borderless mt-4" role="grid"
+                                <table id="user-list-table" class="table table-striped table-borderless table-hover mt-4" role="grid"
                                     aria-describedby="user-list-page-info">
                                     <thead>
                                         <tr>
+                                            <th>Emp Id</th>
                                             <th> Name</th>
                                             <th>email</th>
                                             <th>Designation</th>
@@ -63,8 +64,9 @@
                                     <tbody>
                                         @forelse ($users as $item)
                                             <tr>
+                                                <td>{{$item->emp_id ?? 'N/A'}}</td>
                                                 <td class="d-flex align-items-center"><img class="avatar-40 rounded mr-2"
-                                                        src="{{ $item->image ? asset("uploads/images/$item->image") : asset('no.svg') }}"
+                                                        src="{{ $item->image ? asset("uploads/images/$item->image") : 'https://nileprojects.in/hrmodule/public/assets/images/user/image.png' }}"
                                                         alt="profile"> {{ $item->name }}</td>
 
                                                 <td>{{ $item->email }}</td>
@@ -82,6 +84,7 @@
                                                             data-email="{{ $item->email ?? '' }}"
                                                             data-designation="{{$item->designation}}"
                                                             data-phone="{{$item->phone}}"
+                                                              data-emp="{{$item->emp_id}}"
                                                             data-image="{{ $item->image ? asset("uploads/images/$item->image") : null }}"
                                                             data-url="{{ route('admin.users.update', $item->id) }}"
                                                             onclick="showData(this)" data-target="#EditModel"
@@ -182,7 +185,7 @@
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title">Create User</h5>
+                        <h5 class="modal-title">Add Employee</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -194,6 +197,12 @@
                                 <label for="name">Name*</label>
                                 <input type="text" name="name" class="form-control" required>
                             </div>
+
+                            <div class="form-group">
+                                <label for="name">Emp Id*</label>
+                                <input type="text" name="emp_id" class="form-control" required pattern="\d{4}" minlength="4" maxlength="4" >
+                            </div>
+
                             <div class="form-group">
                                 <label for="name">Email*</label>
                                 <input type="email" name="email" class="form-control" required>
@@ -206,7 +215,8 @@
 
                             <div class="form-group">
                                 <label for="name">Phone Number*</label>
-                                <input type="number" name="phone" class="form-control" required>
+                                <input type="text" name="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
+
                             </div>
                             <div class="form-group">
                                 <label for="name">Password*</label>
@@ -246,7 +256,7 @@
                     @csrf
                     @method('PUT')
                     <div class="modal-header">
-                        <h5 class="modal-title">Edit User</h5>
+                        <h5 class="modal-title">Edit Employee</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -257,6 +267,11 @@
                             <div class="form-group">
                                 <label for="name">Name*</label>
                                 <input type="text" name="name" id="name" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Emp Id*</label>
+                                <input type="text" name="emp_id" id="emp_id" class="form-control" required pattern="\d{4}" minlength="4" maxlength="4" >
                             </div>
                             <div class="form-group">
                                 <label for="name">Email*</label>
@@ -270,7 +285,8 @@
 
                             <div class="form-group">
                                 <label for="name">Phone No.*</label>
-                                <input type="number" name="phone" id="phone" class="form-control" required>
+                                <input type="text" name="phone" id="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
+
                             </div>
                             <div class="form-group">
                                 <div>
@@ -553,6 +569,7 @@
 
             $("#designation").val(ele.getAttribute("data-designation"));
             $("#phone").val(ele.getAttribute("data-phone"));
+            $("#emp_id").val(ele.getAttribute("data-emp"));
 
             $("#status").val(ele.getAttribute("data-status"));
             $("#name").val(ele.getAttribute("data-name"));

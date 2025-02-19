@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AjaxController extends Controller
 {
@@ -187,45 +188,92 @@ class AjaxController extends Controller
     }
 
 
+   
     public function fetchAttendance(Request $request)
     {
         if ($request->has("id")) {
             $id = $request->id;
             $user = User::find($id);
+    
             if ($user) {
-                // Paginate records (e.g., 10 records per page)
-                $records = Attendance::where("user_id", $id)
-                    ->orderBy("id", "desc")
-                    ->paginate(10);  // Adjust the number of records per page as needed
-
-                // Format check-in and check-out times
-                foreach ($records as $item) {
-                    $item->check_in_time = date("H:i", strtotime($item->check_in_time));
-                    $item->check_out_time = date("H:i", strtotime($item->check_out_time));
+                // Get selected month & year from request, or default to current month & year
+                $selectedMonth = $request->input('month', now()->format('m'));
+                $selectedYear = $request->input('year', now()->format('Y'));
+    
+                $selectedDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1);
+                $daysInMonth = $selectedDate->daysInMonth; // Total days in month
+                $today = now()->format('Y-m-d'); // Get today's date in YYYY-MM-DD format
+    
+                // Fetch holidays in the selected month & year
+                $holidays = Holiday::whereYear('date', $selectedYear)
+                    ->whereMonth('date', $selectedMonth)
+                    ->pluck('date')
+                    ->toArray();
+    
+                // Fetch attendance records for the selected month & year
+                $attendances = Attendance::where("user_id", $id)
+                    ->whereYear("date", $selectedYear)
+                    ->whereMonth("date", $selectedMonth)
+                    ->orderBy("date", "asc")
+                    ->get()
+                    ->keyBy('date'); // Convert to associative array for easy lookup
+    
+                $records = [];
+    
+                for ($day = 1; $day <= $daysInMonth; $day++) {
+                    $date = $selectedYear . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                    $dayOfWeek = date('N', strtotime($date)); // 1 = Monday, 7 = Sunday
+    
+                    // Default status
+                    $status = "Absent";
+    
+                    if ($date > $today) {
+                        $status = "N/A"; // Future date
+                    } elseif (in_array($date, $holidays)) {
+                        $status = "Holiday";
+                    } elseif ($dayOfWeek == 6 || $dayOfWeek == 7) { // Saturday (6) & Sunday (7)
+                        $status = "Weekly Off";
+                    } elseif (isset($attendances[$date])) {
+                        $attendance = $attendances[$date];
+    
+                        $status = [
+                            "check_in_time" => !empty($attendance->check_in_time) ? date("H:i", strtotime($attendance->check_in_time)) : "N/A",
+                            "check_out_time" => !empty($attendance->check_out_time) ? date("H:i", strtotime($attendance->check_out_time)) : "N/A",
+                            "check_in_address" => $attendance->check_in_full_address ?? "N/A",
+                            "check_out_address" => $attendance->check_out_full_address ?? "N/A",
+                        ];
+                    }
+    
+                    $records[] = [
+                        "date" => $date,
+                        "status" => $status
+                    ];
                 }
-
-                // Get today's attendance (if exists)
-                $today = Attendance::where("user_id", $id)
-                    ->whereDate("date", now())
-                    ->orderBy("id", "desc")
-                    ->first();
-
-                if ($today) {
-                    $today->check_in_time = date("H:i", strtotime($today->check_in_time));
-                    $today->check_out_time = date("H:i", strtotime($today->check_out_time));
-                }
-
+    
+                // **Apply Pagination**
+                $perPage = 10;
+                $page = $request->input('page', 1);
+                $offset = ($page - 1) * $perPage;
+                $paginatedRecords = new LengthAwarePaginator(
+                    array_slice($records, $offset, $perPage),
+                    count($records),
+                    $perPage,
+                    $page
+                );
+    
                 return response()->json([
-                    'success' => true, 
-                    'records' => $records->items(), // Only return the current page's records
-                    'today' => $today,
-                    'current_page' => $records->currentPage(), // Current page number
-                    'last_page' => $records->lastPage(), // Last page number
-                    'total' => $records->total(), // Total number of records
+                    'success' => true,
+                    'records' => $paginatedRecords->items(),
+                    'current_page' => $paginatedRecords->currentPage(),
+                    'last_page' => $paginatedRecords->lastPage(),
+                    'total' => $paginatedRecords->total(),
                 ]);
             }
         }
-
+    
         return response()->json(['success' => false, 'message' => 'User does not exist']);
     }
+
+
+    
 }

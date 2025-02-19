@@ -66,12 +66,18 @@
                       
                         <li @if (Route::is('admin.users.index')) class="active" @endif>
                             <a href="{{ route('admin.users.index') }}" class="iq-waves-effect">
-                                <i class="ri-user-settings-line"></i><span>User Management</span></a>
+                                <i class="ri-user-settings-line"></i><span>Employee Management</span></a>
                         </li>
 
                         <li @if (Route::is('admin.holidayss.index')) class="active" @endif>
                             <a href="{{ route('admin.holidayss.index') }}" class="iq-waves-effect">
                             <i class="ri-calendar-event-line"></i><span>Holidays</span></a>
+                        </li>
+
+                        <li>
+                            <a href="#" class="iq-waves-effect" onclick="askLogout()">
+                                <i class="ri-login-box-line"></i><span>Logout</span>
+                            </a>
                         </li>
                       
                     </ul>
@@ -116,14 +122,14 @@
                         <li>
                             <a href="#"
                                 class="search-toggle iq-waves-effect d-flex align-items-center bg-primary rounded">
-                                <img src="{{ asset('assets/images/user/1.jpg') }}" class="img-fluid rounded mr-3"
+                                <img src="{{ asset('assets/images/user/image.png') }}" class="img-fluid rounded mr-3"
                                     alt="user">
                                 <div class="caption">
                                     <h6 class="mb-0 line-height text-white">{{ auth()->user()->name }}</h6>
                                     <!-- <span class="font-size-12 text-white">Available</span> -->
                                 </div>
                             </a>
-                            <div class="iq-sub-dropdown iq-user-dropdown">
+                            <div class="iq-sub-dropdown iq-user-dropdown d-none">
                                 <div class="iq-card shadow-none m-0">
                                     <div class="iq-card-body p-0 ">
                                         <div class="bg-primary p-3">

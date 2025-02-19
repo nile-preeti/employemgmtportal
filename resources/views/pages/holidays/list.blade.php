@@ -19,7 +19,7 @@
                                             <form class="mr-3 position-relative">
                                                 <div class="form-group mb-0">
                                                     <input type="search" class="form-control" name="search"
-                                                        placeholder="Search by  reason..." aria-controls="user-list-table">
+                                                        placeholder="Search by  name..." aria-controls="user-list-table">
                                                 </div>
                                             </form>
                                         </div>
@@ -34,16 +34,16 @@
 
                                             <a class="iq-bg-primary"
                                                 onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
-                                                data-toggle="modal" data-target=".CreateModel" href="#">Create</a>
+                                                data-toggle="modal" data-target=".CreateModel" href="#">Add Holiday</a>
                                         </div>
                                     </div>
                                 </div>
-                                <table id="user-list-table" class="table table-striped table-borderless mt-4" role="grid"
+                                <table id="user-list-table" class="table table-striped table-borderless mt-4 table-hover" role="grid"
                                     aria-describedby="user-list-page-info">
                                     <thead>
                                         <tr>
-                                            <th>SL.No.</th>
-                                            <th>Reason</th>
+                                            <th>S.No.</th>
+                                            <th>Name</th>
                                             <th>Day</th>
                                             <th>Date</th>
                                             <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
@@ -172,7 +172,7 @@
 
                         <div class="container-fluid">
                             <div class="form-group">
-                                <label for="name">Reason*</label>
+                                <label for="name">Name*</label>
                                 <input type="text" name="reason" class="form-control" required>
                             </div>
                             <div class="form-group">
@@ -208,7 +208,7 @@
 
                         <div class="container-fluid">
                             <div class="form-group">
-                                <label for="name">Reason*</label>
+                                <label for="name">Name*</label>
                                 <input type="text" name="reason" id="name" class="form-control" required>
                             </div>
                             <div class="form-group">

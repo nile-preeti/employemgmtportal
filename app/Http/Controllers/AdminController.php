@@ -11,16 +11,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
+use Carbon\Carbon;
+use App\Models\Holiday;
 
 class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
         $users = User::where("role_id", 2)->orderBy('id','DESC')->get();
+        $totalHolidays = Holiday::whereYear('date', Carbon::now()->year)->count();
        
         
     
-        return view("pages.dashboard", compact("users" ));
+        return view("pages.dashboard", compact("users" ,"totalHolidays"));
     }
     public function signin()
     {

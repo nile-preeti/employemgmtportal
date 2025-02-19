@@ -127,9 +127,9 @@
                             < Home</a> Attendance Record</h2>
                 </div>
                 <div class="row">
-                    <ol id="recordsList" style="padding-left: 50px;">
+                    <ul id="recordsList" style="padding-left: 50px;list-style: none;">
                         <!-- Dynamic content will be added here by the JavaScript -->
-                    </ol>
+                    </ul>
 
                     <div id="pagination-controls" class="d-flex justify-content-end">
                         <button id="prev-page" onclick="changePage('prev')" disabled>Previous</button>
@@ -213,114 +213,182 @@
         </div>
     </div>
     <script>
-        let currentPage = 1;
-        let lastPage = 1;
+     let currentPage = 1;
+let lastPage = 1;
 
-        // Function to display records
-        function displayRecords(records) {
-            const recordsList = document.querySelector("#recordsList");
-            recordsList.innerHTML = ""; // Clear previous records
+// Function to display records
+function displayRecords(records) {
+    console.log(records);
+    const recordsList = document.querySelector("#recordsList");
+    recordsList.innerHTML = ""; // Clear previous records
 
-            records.forEach((record) => {
-                const listItem = document.createElement("li");
-                listItem.classList.add("mt-4");
+    records.forEach((record) => {
+        const listItem = document.createElement("li");
+        listItem.classList.add("mt-4");
 
-                const formatTime = (time) => time ? new Date(`1970-01-01T${time}:00`).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }) : "N/A";
-                const formatAddress = (address) => address || "N/A";
+        const formatTime = (time) => {
+            if (!time || time === "N/A") return "N/A"; // Handle missing values properly
+            return new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        };
 
-                listItem.innerHTML = `
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="d-flex justify-content-between date-time-sec">
-                            <h6>Date : ${new Date(record.date).toLocaleDateString('en-GB')}</h6>
-                        </div>
-                        <div class="card-body py-2 px-2">
-                            <div class="attendance-record-data">
-                                <div class="d-md-flex justify-content-md-between">
-                                    <div>
-                                        <h6> Check-in Time : <span>${formatTime(record.check_in_time)}</span></h6>
-                                        <h6> Address : <span>${formatAddress(record.check_in_full_address)}</span></h6>
-                                    </div>
-                                    <div>
-                                        <div class="d-md-flex justify-content-md-end">
-                                            <h6> Check-out Time : <span>${formatTime(record.check_out_time)}</span></h6>
-                                        </div>
-                                        <div class="d-md-flex justify-content-md-end">
-                                            <h6> Address : <span>${formatAddress(record.check_out_full_address)}</span></h6>
-                                        </div>
-                                    </div>
+        const formatAddress = (address) => address || "N/A";
+
+        // Determine Status for Display
+        let statusLabel = "Present"; // Default Status
+        let bgColor = "badge-success"; // Default Green for Present
+
+        if (record.status === "Absent") {
+            statusLabel = "Absent";
+            bgColor = "badge-danger"; // Red for Absent
+        } else if (record.status === "Holiday") {
+            statusLabel = "Holiday";
+            bgColor = "badge-warning"; // Yellow for Holiday
+        } else if (record.status === "Weekly Off") {
+            statusLabel = "Weekly Off";
+            bgColor = "badge-info"; // Blue for Weekly Off
+        } else if (record.status === "N/A") {  
+            statusLabel = "N/A";
+            bgColor = "badge-secondary"; // Grey for N/A
+        }
+
+        // If status is an object, it means the user has attendance (check-in/check-out times)
+        if (typeof record.status === "object") {
+            statusLabel = "Present";
+            bgColor = "badge-success"; // Default for present
+        }
+
+        listItem.innerHTML = `
+        <div class="col-md-12">
+            <div class="card">
+                <div class="d-flex justify-content-between date-time-sec">
+                    <h6>
+                        Date: ${new Date(record.date).toLocaleDateString('en-GB')} 
+                        <span class="badge ${bgColor}">${statusLabel}</span>
+                    </h6>
+                </div>
+                <div class="card-body py-2 px-2">
+                    <div class="attendance-record-data">
+                        <div class="d-md-flex justify-content-md-between">
+                            <div>
+                                <h6> Check-in Time: <span>${formatTime(record.status.check_in_time)}</span></h6>
+                                <h6> Check-in Address: <span>${formatAddress(record.status.check_in_address)}</span></h6>
+                            </div>
+                            <div>
+                                <div class="d-md-flex justify-content-md-end">
+                                    <h6> Check-out Time: <span>${formatTime(record.status.check_out_time)}</span></h6>
+                                </div>
+                                <div class="d-md-flex justify-content-md-end">
+                                    <h6> Check-out Address: <span>${formatAddress(record.status.check_out_address)}</span></h6>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            `;
-                recordsList.appendChild(listItem);
-            });
-        }
+            </div>
+        </div>`;
 
-        // Function to update pagination controls
-        function updatePaginationControls(total, currentPage, lastPage) {
-            const paginationControls = document.getElementById("pagination-controls");
-            const pageInfo = document.getElementById("page-info");
-            const prevButton = document.getElementById("prev-page");
-            const nextButton = document.getElementById("next-page");
+        recordsList.appendChild(listItem);
+    });
+}
 
-            pageInfo.textContent = `Page ${currentPage} of ${lastPage}`;
 
-            prevButton.disabled = currentPage <= 1;
-            nextButton.disabled = currentPage >= lastPage;
+// Function to update pagination controls
+function updatePaginationControls() {
+    const paginationControls = document.getElementById("pagination-controls");
+    const pageInfo = document.getElementById("page-info");
+    const prevButton = document.getElementById("prev-page");
+    const nextButton = document.getElementById("next-page");
 
-            // Hide pagination if there's only one page
-            if (lastPage <= 1) {
-                paginationControls.style.setProperty('display', 'none', 'important');
-            } else {
-                paginationControls.style.setProperty('display', 'flex', 'important');
+    pageInfo.textContent = `Page ${currentPage} of ${lastPage}`;
+
+    prevButton.disabled = currentPage <= 1;
+    nextButton.disabled = currentPage >= lastPage;
+
+    // Hide pagination if there's only one page
+    paginationControls.style.display = lastPage <= 1 ? "none" : "flex";
+}
+
+// Function to change the page
+function changePage(direction) {
+    if (direction === 'prev' && currentPage > 1) {
+        currentPage--;
+    } else if (direction === 'next' && currentPage < lastPage) {
+        currentPage++;
+    }
+
+    fetchRecords(currentPage);
+}
+
+// Function to fetch attendance records for a specific page
+function fetchRecords(page = 1) {
+    $.get("{{ route('user.attendance.fetch') }}", {
+        id: user.id,
+        page: page
+    }, function(data) {
+        if (data.success) {
+            if (data.records) {
+                displayRecords(data.records); // Display the records
+                currentPage = data.current_page; // Update current page
+                lastPage = data.last_page; // Update last page
+                updatePaginationControls(); // Update pagination controls
             }
         }
+    });
+}
 
-        // Function to change the page
-        function changePage(direction) {
-            if (direction === 'prev' && currentPage > 1) {
-                currentPage--;
-            } else if (direction === 'next' && currentPage < lastPage) {
-                currentPage++;
-            }
-
-            fetchRecords(currentPage); // Fetch records for the updated page
-        }
-
-        // Function to fetch attendance records for a specific page
-        function fetchRecords(page = 1) {
-            $.get("{{ route('user.attendance.fetch') }}", {
-                id: user.id,
-                page: page
-            }, function(data) {
-                if (data.success) {
-                    if (data.records) {
-                        displayRecords(data.records); // Display the records
-                        currentPage = data.current_page; // Update current page
-                        lastPage = data.last_page; // Update last page
-                        updatePaginationControls(data.total, currentPage, lastPage); // Update pagination controls
-                    }
-                }
-            });
-        }
-
-        // Check if user is logged in and fetch records
-        var user = @json($user);
-        if (user) {
-            fetchRecords(); // Fetch records for the first page
-            $("#name").text(user.name); // Display user name
-        } else {
-            window.location = "{{ route('user.dashboard') }}";
-        }
+// Check if user is logged in and fetch records
+var user = @json($user);
+if (user) {
+    fetchRecords(); // Fetch records for the first page
+    $("#name").text(user.name); // Display user name
+} else {
+    window.location = "{{ route('user.dashboard') }}";
+}
     </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        populateMonthFilter();
+        fetchAttendance(); // Load attendance data initially
+    });
 
+    function populateMonthFilter() {
+        const monthFilter = document.getElementById("monthFilter");
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
+        const currentYear = currentDate.getFullYear();
+
+        for (let i = 0; i < 12; i++) {
+            const date = new Date(currentYear, currentMonth - 1 - i, 1);
+            const monthValue = date.toISOString().slice(0, 7); // Format YYYY-MM
+            const monthText = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const option = new Option(monthText, monthValue);
+            if (monthValue === `${currentYear}-${String(currentMonth).padStart(2, '0')}`) {
+                option.selected = true;
+            }
+            monthFilter.appendChild(option);
+        }
+    }
+
+    function fetchAttendance(page = 1) {
+        const userId = 1; // Replace with dynamic user ID
+        const selectedMonth = document.getElementById("monthFilter").value;
+
+        fetch(`/fetch-attendance?id=${userId}&month=${selectedMonth}&page=${page}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayRecords(data.records);
+                    updatePagination(data.current_page, data.last_page);
+                }
+            })
+            .catch(error => console.error("Error fetching attendance:", error));
+    }
+</script>
 </body>
 
 </html>
