@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
-use App\Models\EventName;
-use App\Models\EventType;
+use App\Models\Holiday;
 use App\Models\User;
-use App\Models\UserChatCount;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AjaxController extends Controller
 {
@@ -43,39 +41,60 @@ class AjaxController extends Controller
             'check_in_longitude' => 'required|string',
             'user_id' => "required"
         ]);
-
+    
         $userId = $request->user_id;
-        $today = Carbon::today()->toDateString();
-
+        $today = Carbon::today();
+        $todayDate = $today->toDateString();
+        $dayOfWeek = $today->format('l'); // Get the full day name (e.g., "Saturday", "Sunday")
+    
+        // Check if today is a weekend (Saturday or Sunday)
+        if (in_array($dayOfWeek, ['Saturday', 'Sunday'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Check-in is not allowed on weekends.",
+            ], 400);
+        }
+    
+        // Check if today is a holiday
+        $isHoliday = Holiday::where('date', $todayDate)->exists();
+        if ($isHoliday) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Check-in is not allowed on holidays.",
+            ], 400);
+        }
+    
         // Check if the user has already checked in today
         $existingAttendance = Attendance::where('user_id', $userId)
-            ->where('date', $today)
+            ->where('date', $todayDate)
             ->first();
-
+    
         if ($existingAttendance) {
-
             return response()->json([
                 'status' => 'error',
                 'message' => "You have already checked in today.",
             ], 400);
         }
-
+    
         // Create new attendance record
         $attendance = new Attendance();
-        $attendance->date = $today;
+        $attendance->date = $todayDate;
         $attendance->user_id = $userId;
         $attendance->check_in_full_address = $request->check_in_full_address;
         $attendance->check_in_latitude = $request->check_in_latitude;
         $attendance->check_in_longitude = $request->check_in_longitude;
         $attendance->check_in_time = Carbon::now()->format('H:i:s');
-        $attendance->status = "Checked In";
+        $attendance->status = "Present";
         $attendance->save();
-        $attendance->check_in_time = date("H:i", strtotime($attendance->check_in_time));
-        $attendance->check_out_time = date("H:i", strtotime($attendance->check_out_time));
+    
         return response()->json([
             'status' => 'success',
             'message' => 'Check-in recorded successfully.',
-            'data' => $attendance
+            'data' => [
+                'date' => $attendance->date,
+                'check_in_time' => date("H:i", strtotime($attendance->check_in_time)),
+                'status' => $attendance->status
+            ]
         ]);
     }
 
@@ -89,13 +108,12 @@ class AjaxController extends Controller
             'check_out_latitude' => 'required|string',
             'check_out_longitude' => 'required|string',
             'user_id' => 'required|string',
-
         ]);
 
         $userId = $request->user_id;
         $today = Carbon::today()->toDateString();
 
-        // Find today's check-in record
+        // Find today's attendance record
         $attendance = Attendance::where('user_id', $userId)
             ->where('date', $today)
             ->first();
@@ -107,30 +125,160 @@ class AjaxController extends Controller
             ], 400);
         }
 
-        // if ($attendance->check_out_time) {
+        // If both check-in and check-out times are NULL, update status to "Absent"
+        if (!$attendance->check_in_time && !$attendance->check_out_time) {
+            $attendance->status = "Absent";
+            $attendance->save();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => "No check-in and check-out recorded, marked as Absent.",
+            ], 400);
+        }
+
+        // If check-in time is present but check-out time is missing, mark as "Absent"
+        // if ($attendance->check_in_time && !$attendance->check_out_time) {
+        //     $attendance->status = "Absent";
+        //     $attendance->save();
+
         //     return response()->json([
         //         'status' => 'error',
-        //         'message' => "You have already checked out today.",
+        //         'message' => "Check-in recorded but no check-out found, marked as Absent.",
         //     ], 400);
         // }
 
-        // Update check-out details
-        $attendance->check_out_full_address = $request->check_out_full_address;
-        $attendance->check_out_latitude = $request->check_out_latitude;
-        $attendance->check_out_longitude = $request->check_out_longitude;
-        $attendance->check_out_time = Carbon::now()->format('H:i:s');
-        $attendance->status = "Checked Out";
+        // If both check-in and check-out times are present, calculate worked hours
+        $checkInTime = Carbon::parse($attendance->check_in_time);
+        $checkOutTime = Carbon::now();  // Use current time for check-out if not provided
+
+        // Calculate worked hours
+        $totalMinutes = $checkInTime->diffInMinutes($checkOutTime);  // Get the difference in minutes for more precision
+        $totalHours = $totalMinutes / 60;  // Convert minutes to hours
+
+        // Determine status based on hours worked
+        if ($totalHours < 4.5) {
+            $status = "Absent";  // Set status as "Absent" if worked hours are less than 4.5
+        } elseif ($totalHours < 9) {
+            $status = "Half-day";  // Set status as "Half-day" if worked hours are less than 9
+        } else {
+            $status = "Present";  // Otherwise, set status as "Present"
+        }
+
+        // Update check-out details (only if check-out time is provided)
+        if ($request->check_out_full_address && $request->check_out_latitude && $request->check_out_longitude) {
+            $attendance->check_out_full_address = $request->check_out_full_address;
+            $attendance->check_out_latitude = $request->check_out_latitude;
+            $attendance->check_out_longitude = $request->check_out_longitude;
+            $attendance->check_out_time = $checkOutTime->format('H:i:s');
+        }
+
+        $attendance->status = $status;
         $attendance->save();
-        $attendance->check_in_time = date("H:i", strtotime($attendance->check_in_time));
-        $attendance->check_out_time = date("H:i", strtotime($attendance->check_out_time));
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Check-out recorded successfully.',
-            'data' => $attendance
+            'message' => 'Attendance updated successfully.',
+            'data' => [
+                'check_in_time' => $checkInTime->format('H:i'),
+                'check_out_time' => $checkOutTime->format('H:i'),
+                'total_hours_worked' => $totalHours,
+                'status' => $status
+            ]
         ]);
     }
 
+
+   
     public function fetchAttendance(Request $request)
+    {
+        if ($request->has("id")) {
+            $id = $request->id;
+            $user = User::find($id);
+    
+            if ($user) {
+                // Get selected month & year from request, or default to current month & year
+                $selectedMonth = $request->input('month', now()->format('m'));
+                $selectedYear = $request->input('year', now()->format('Y'));
+    
+                $selectedDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1);
+                $daysInMonth = $selectedDate->daysInMonth; // Total days in month
+                $today = now()->format('Y-m-d'); // Get today's date in YYYY-MM-DD format
+    
+                // Fetch holidays in the selected month & year
+                $holidays = Holiday::whereYear('date', $selectedYear)
+                    ->whereMonth('date', $selectedMonth)
+                    ->pluck('date')
+                    ->toArray();
+    
+                // Fetch attendance records for the selected month & year
+                $attendances = Attendance::where("user_id", $id)
+                    ->whereYear("date", $selectedYear)
+                    ->whereMonth("date", $selectedMonth)
+                    ->orderBy("date", "asc")
+                    ->get()
+                    ->keyBy('date'); // Convert to associative array for easy lookup
+    
+                $records = [];
+    
+                for ($day = 1; $day <= $daysInMonth; $day++) {
+                    $date = $selectedYear . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                    $dayOfWeek = date('N', strtotime($date)); // 1 = Monday, 7 = Sunday
+    
+                    // Default status
+                    $status = "Absent";
+    
+                    if ($date > $today) {
+                        $status = "N/A"; // Future date
+                    } elseif (in_array($date, $holidays)) {
+                        $status = "Holiday";
+                    } elseif ($dayOfWeek == 6 || $dayOfWeek == 7) { // Saturday (6) & Sunday (7)
+                        $status = "Weekly Off";
+                    } elseif (isset($attendances[$date])) {
+                        $attendance = $attendances[$date];
+    
+                        $status = [
+                            "check_in_time" => !empty($attendance->check_in_time) ? date("H:i", strtotime($attendance->check_in_time)) : "N/A",
+                            "check_out_time" => !empty($attendance->check_out_time) ? date("H:i", strtotime($attendance->check_out_time)) : "N/A",
+                            "check_in_address" => $attendance->check_in_full_address ?? "N/A",
+                            "check_out_address" => $attendance->check_out_full_address ?? "N/A",
+                        ];
+                    }
+    
+                    $records[] = [
+                        "date" => $date,
+                        "status" => $status
+                    ];
+                }
+    
+                // **Apply Pagination**
+                $perPage = 10;
+                $page = $request->input('page', 1);
+                $offset = ($page - 1) * $perPage;
+                $paginatedRecords = new LengthAwarePaginator(
+                    array_slice($records, $offset, $perPage),
+                    count($records),
+                    $perPage,
+                    $page
+                );
+    
+                return response()->json([
+                    'success' => true,
+                    'records' => $paginatedRecords->items(),
+                    'current_page' => $paginatedRecords->currentPage(),
+                    'last_page' => $paginatedRecords->lastPage(),
+                    'total' => $paginatedRecords->total(),
+                ]);
+            }
+        }
+    
+        return response()->json(['success' => false, 'message' => 'User does not exist']);
+    }
+
+
+    
+
+
+    public function fetchAttendancetoday(Request $request)
     {
         if ($request->has("id")) {
             $id = $request->id;
@@ -143,13 +291,43 @@ class AjaxController extends Controller
                 }
                 $today = Attendance::where("user_id", $id)->whereDate("date", now())->orderBy("id", "desc")->first();
                 if ($today) {
-                    $today->check_in_time = date("H:i", strtotime($today->check_in_time));
-                    $today->check_out_time = date("H:i", strtotime($today->check_out_time));
+                    $today->check_in_time = !empty($today->check_in_time) 
+                        ? date("H:i", strtotime($today->check_in_time)) 
+                        : 'N/A';
+                
+                    $today->check_out_time = !empty($today->check_out_time) 
+                        ? date("H:i", strtotime($today->check_out_time)) 
+                        : 'N/A';
                 }
+                
                 return response()->json(['success' => true, 'records' => $records, 'today' => $today]);
             }
         }
 
         return response()->json(['success' => false, 'message' => 'user does not exists']);
     }
+
+
+    public function Employeedirectory(Request $request)
+    {
+        $perPage = 10; // Number of records per page
+        $page = $request->input('page', 1);
+
+        $employees = User::where('role_id', 2)
+            ->where('status', 1)
+            ->select('id', 'name', 'email', 'emp_id', 'designation', 'phone')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'success' => true,
+            'employees' => $employees->items(),
+            'current_page' => $employees->currentPage(),
+            'last_page' => $employees->lastPage(),
+            'total' => $employees->total(),
+        ]);
+    }
+
+
+
+    
 }

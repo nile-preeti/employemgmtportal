@@ -14,7 +14,7 @@
                         <div class="iq-card-body">
                             <div class="">
                                 <div class="row justify-content-between">
-                                    <div class="col-sm-12 col-md-6">
+                                    <div class="col-sm-12 col-md-5">
                                         <div id="user_list_datatable_info" class="dataTables_filter">
                                             <form class="mr-3 position-relative">
                                                 <div class="form-group mb-0">
@@ -29,10 +29,10 @@
                                             onclick="window.location.href = window.location.origin + window.location.pathname;"><img
                                                 src="{{ asset('reset.png') }}" height="20" alt=""></span>
                                     </div>
-                                    <div class="col-sm-12 col-md-5">
+                                    <div class="col-sm-12 col-md-6">
                                         <div class="user-list-files d-flex">
                                             <select class="form-control" id="selectcountry"
-                                                onchange="changeStatus(this.value)">
+                                                onchange="changeStatus(this.value)" style="width: 55%;">
                                                 <option value="">--Filter By Status--</option>
                                                 <option value="1" @if (request()->has('status') && request('status') == 1) selected @endif>
                                                     Active </option>
@@ -44,14 +44,19 @@
 
                                             <a class="iq-bg-primary"
                                                 onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
-                                                data-toggle="modal" data-target=".CreateModel" href="#">Create</a>
+                                                data-toggle="modal" data-target=".CreateModel" href="#" style="margin-right:10px;">Add Employee</a>
+
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#importExcelModal">
+                                                    Import Excel
+                                                </button>
                                         </div>
                                     </div>
                                 </div>
-                                <table id="user-list-table" class="table table-striped table-borderless mt-4" role="grid"
+                                <table id="user-list-table" class="table table-striped table-borderless table-hover mt-4" role="grid"
                                     aria-describedby="user-list-page-info">
                                     <thead>
                                         <tr>
+                                            <th>Emp Id</th>
                                             <th> Name</th>
                                             <th>email</th>
                                             <th>Designation</th>
@@ -63,8 +68,9 @@
                                     <tbody>
                                         @forelse ($users as $item)
                                             <tr>
+                                                <td>{{$item->emp_id ?? 'N/A'}}</td>
                                                 <td class="d-flex align-items-center"><img class="avatar-40 rounded mr-2"
-                                                        src="{{ $item->image ? asset("uploads/images/$item->image") : asset('no.svg') }}"
+                                                        src="{{ $item->image ? asset("uploads/images/$item->image") : 'https://nileprojects.in/hrmodule/public/assets/images/user/image.png' }}"
                                                         alt="profile"> {{ $item->name }}</td>
 
                                                 <td>{{ $item->email }}</td>
@@ -82,19 +88,20 @@
                                                             data-email="{{ $item->email ?? '' }}"
                                                             data-designation="{{$item->designation}}"
                                                             data-phone="{{$item->phone}}"
+                                                              data-emp="{{$item->emp_id}}"
                                                             data-image="{{ $item->image ? asset("uploads/images/$item->image") : null }}"
-                                                            data-url="{{ route('users.update', $item->id) }}"
+                                                            data-url="{{ route('admin.users.update', $item->id) }}"
                                                             onclick="showData(this)" data-target="#EditModel"
                                                             style="cursor: pointer"><i class="ri-pencil-fill"></i></a>
                                                         {{-- delete  button --}}
                                                         <a class="iq-bg-danger" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
-                                                            data-url="{{ route('users.destroy', $item->id) }}"
+                                                            data-url="{{ route('admin.users.destroy', $item->id) }}"
                                                             onclick="deletePublic(this)"><i
                                                                 class="ri-delete-bin-7-line"></i></a>
                                                         <a class="iq-bg-danger" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
-                                                            href="{{ route('userAttendance', $item->id) }}"><i
+                                                            href="{{ route('admin.userAttendance', $item->id) }}"><i
                                                                 class="ri-eye-fill"></i></a>
 
 
@@ -178,11 +185,11 @@
     <div class="modal fade CreateModel" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('users.store') }}" method="post" id="create_form"
+                <form action="{{ route('admin.users.store') }}" method="post" id="create_form"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title">Create User</h5>
+                        <h5 class="modal-title">Add Employee</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -194,6 +201,12 @@
                                 <label for="name">Name*</label>
                                 <input type="text" name="name" class="form-control" required>
                             </div>
+
+                            <div class="form-group">
+                                <label for="name">Emp Id*</label>
+                                <input type="text" name="emp_id" class="form-control" required pattern="\d{4}" minlength="4" maxlength="4" >
+                            </div>
+
                             <div class="form-group">
                                 <label for="name">Email*</label>
                                 <input type="email" name="email" class="form-control" required>
@@ -206,7 +219,8 @@
 
                             <div class="form-group">
                                 <label for="name">Phone Number*</label>
-                                <input type="number" name="phone" class="form-control" required>
+                                <input type="text" name="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
+
                             </div>
                             <div class="form-group">
                                 <label for="name">Password*</label>
@@ -242,11 +256,11 @@
     <div class="modal fade EditModel" tabindex="-1" role="dialog" aria-hidden="true" id="EditModel">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('users.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
+                <form action="{{ route('admin.users.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-header">
-                        <h5 class="modal-title">Edit User</h5>
+                        <h5 class="modal-title">Edit Employee</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -257,6 +271,11 @@
                             <div class="form-group">
                                 <label for="name">Name*</label>
                                 <input type="text" name="name" id="name" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Emp Id*</label>
+                                <input type="text" name="emp_id" id="emp_id" class="form-control" required pattern="\d{4}" minlength="4" maxlength="4" >
                             </div>
                             <div class="form-group">
                                 <label for="name">Email*</label>
@@ -270,7 +289,8 @@
 
                             <div class="form-group">
                                 <label for="name">Phone No.*</label>
-                                <input type="number" name="phone" id="phone" class="form-control" required>
+                                <input type="text" name="phone" id="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
+
                             </div>
                             <div class="form-group">
                                 <div>
@@ -309,6 +329,26 @@
             </div>
         </div>
     </div>
+      <!-- Import Excel Modal -->
+        <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importExcelModalLabel">Import Employees</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="importExcelForm" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="file" name="file" class="form-control" required accept=".xlsx,.xls,.csv">
+                            <button type="submit" class="btn btn-success mt-3 w-100">Import</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 @push('js')
     <script>
@@ -553,6 +593,7 @@
 
             $("#designation").val(ele.getAttribute("data-designation"));
             $("#phone").val(ele.getAttribute("data-phone"));
+            $("#emp_id").val(ele.getAttribute("data-emp"));
 
             $("#status").val(ele.getAttribute("data-status"));
             $("#name").val(ele.getAttribute("data-name"));
@@ -562,7 +603,7 @@
         }
 
         function deletePublic(ele) {
-            var title = ' you want to delete this category ?';
+            var title = ' you want to delete this employee ?';
             Swal.fire({
                 title: '',
                 text: title,
@@ -708,4 +749,48 @@
             return myDropzone;
         }
     </script>
+    <script>
+$(document).ready(function() {
+    $("#importExcelForm").on("submit", function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+        
+        $.ajax({
+            url: "{{ route('admin.import') }}",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                Swal.fire({
+                    title: "Importing...",
+                    text: "Please wait while we import the data.",
+                    icon: "info",
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+            },
+            success: function(response) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Employees imported successfully.",
+                    icon: "success",
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload(); // Refresh the page
+                });
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    title: "Error!",
+                    text: xhr.responseJSON.message || "Something went wrong.",
+                    icon: "error"
+                });
+            }
+        });
+    });
+});
+</script>
 @endpush

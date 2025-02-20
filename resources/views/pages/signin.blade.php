@@ -30,19 +30,19 @@
                 <div class="row no-gutters">
                     
                     <div class="col-sm-5 text-center">
-                        <div class="sign-in-detail text-white">
-                            <img src="{{ asset('hrmodule.png') }}" class="img-fluid" class="" alt="" />
+                        <div class="justify-content-center d-flex align-items-center sign-in-detail text-white">
+                            <img src="{{ asset('https://nileprojects.in/hrmodule/public/assets/images/login-logo.png') }}" class="w-50" class="" alt="" />
                         </div>
                     </div>
                     <div class="col-sm-6 align-self-center">
                         <div class="sign-in-from">
-                           
+                           <div class="w-100">
                             <h1 class="mb-0 dark-signin">Admin Login</h1>
                             <p>Enter your email address and password to access admin panel.</p>
                             <form class="mt-4" id="signin_form" enctype="multipart/form-data" action="{{route('signin.post')}}" method="POST">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Registration Email ID</label>
+                                    <label for="exampleInputEmail1">Email ID</label>
                                     <input type="email" name="email" class="form-control mb-0" id="exampleInputEmail1" placeholder="Enter email">
                                 </div>
                                 <div class="form-group">
@@ -50,13 +50,14 @@
                                     <input type="password"  name="password" class="form-control mb-0" id="exampleInputPassword1" placeholder="Password">
                                 </div>
                                 <div class="d-inline-block w-100">
-                                    <button type="submit" class="btn btn-primary float-left">Sign in</button>
+                                    <button type="submit" class="btn btn-signin float-left">Sign in</button>
                                     {{-- <a href="#" class="float-right">Forgot password?</a> --}}
                                 </div>
                                 {{-- <div class="sign-info">
                                     <span class="dark-color d-inline-block line-height-2">Don't have an account? <a href="sign-up.html">Sign up</a></span>
                                 </div> --}}
                             </form>
+                           </div>
                         </div>
                     </div>
                 </div>
@@ -142,8 +143,8 @@
 
                                 }).then((result) => {
 
-                                    if (response.redirect == true) {
-                                        window.location = response.route;
+                                    if (response.redirect) {
+                                        window.location.href = response.redirect; 
                                     }
                                     // var url = $('#redirect_url').val();
                                     // if (url !== undefined || url != null) {

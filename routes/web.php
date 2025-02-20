@@ -27,22 +27,25 @@ Route::get("/admin/login", [AdminController::class, 'signin'])->name('admin.logi
 Route::post("signin_post", [AdminController::class, 'signin_post'])->name('signin.post');
 
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::get("dashboard", [AdminController::class, 'dashboard'])->name("dashboard");
-    Route::get("profile", [AdminController::class, 'profile'])->name("profile");
-    Route::post("profile_post", [AdminController::class, 'profile_post'])->name("profile_post");
+Route::group(['prefix' => 'admin', 'middleware' => 'auth:admin'], function () {
+    Route::get("dashboard", [AdminController::class, 'dashboard'])->name("admin.dashboard");
+    Route::get("profile", [AdminController::class, 'profile'])->name("admin.profile");
+    Route::post("profile_post", [AdminController::class, 'profile_post'])->name("admin.profile_post");
 
-    Route::get("change_password", [AdminController::class, 'change_password'])->name("change_password");
-    Route::post("change_password_post", [AdminController::class, 'change_password_post'])->name("change_password_post");
+    Route::get("change_password", [AdminController::class, 'change_password'])->name("admin.change_password");
+    Route::post("change_password_post", [AdminController::class, 'change_password_post'])->name("admin.change_password_post");
 
-    Route::resource("users", UserController::class);
-    Route::get("users/attendance/{id}", [UserController::class, 'userAttendance'])->name("userAttendance");
+    Route::resource("users", UserController::class, ['as' => 'admin']);
+    Route::get("users/attendance/{id}", [UserController::class, 'userAttendance'])->name("admin.userAttendance");
 
-    //holidays
-    Route::resource("holidayss", HolidayController::class);
+    // Fix: Add 'as' => 'admin.' to holidays resource  
+    Route::resource("holidayss", HolidayController::class, ['as' => 'admin']);
 
-    Route::get("logout", [AdminController::class, 'logout'])->name("logout");
+    Route::get('/download-logs', [AdminController::class, 'downloadLogs'])->name('download.logs');
+    Route::post('/users/import', [UserController::class, 'import'])->name('admin.import');
+    Route::get("logout", [AdminController::class, 'logout'])->name("admin.logout");
 });
+
 
 
 Route::prefix('user')->as("user.")->group(function () {
@@ -58,10 +61,18 @@ Route::prefix('user')->as("user.")->group(function () {
         // Route for updating attendance (Check-out)
         Route::post('/attendance/update', [AjaxController::class, 'updateAttendance'])->name('attendance.update');
         Route::get('/attendance/fetch', [AjaxController::class, 'fetchAttendance'])->name('attendance.fetch');
+        
+
+
+        Route::get('/attendance/fetch/today', [AjaxController::class, 'fetchAttendancetoday'])->name('attendance.fetch.today');
 
         //
         Route::get("attendance_records", [UserController::class, 'attendance_records'])->name("attendance_records");
         Route::get("holidays", [UserController::class, 'holidays'])->name("holidays");
+        Route::get("profile", [UserController::class, 'profile'])->name("profile");
+
+        Route::get("emp-directory", [UserController::class, 'directory'])->name("directory");
+        Route::get("all-emp-directory", [AjaxController::class, 'Employeedirectory'])->name("employee.directory");
 
         Route::get("logout", [UserController::class, 'logout'])->name("logout");
 

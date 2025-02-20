@@ -11,49 +11,106 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Response;
+use App\Models\Holiday;
 
 class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
         $users = User::where("role_id", 2)->orderBy('id','DESC')->get();
+        $totalHolidays = Holiday::whereYear('date', Carbon::now()->year)->count();
        
         
     
-        return view("pages.dashboard", compact("users" ));
+        return view("pages.dashboard", compact("users" ,"totalHolidays"));
+    }
+
+
+    public function downloadLogs()
+    {
+        // Fetch users where status = 1 and role_id = 2
+        $users = User::where('status', 1)->where('role_id', 2)->orderby('id','DESC')->get();
+
+        // Define CSV headers
+        $csvHeader = ['S.No.','Emp ID', 'Name', 'Email', 'Phone', 'Designation'];
+        
+        // Convert users data to CSV format
+        $csvData = [];
+        $serialNo = 1;
+        foreach ($users as $user) {
+            $csvData[] = [
+                $serialNo++,
+                $user->emp_id ?? 'N/A',
+                $user->name ?? 'N/A',
+                $user->email ?? 'N/A' ,
+                $user->phone ?? 'N/A',
+                $user->designation ?? 'N/A',
+            ];
+        }
+
+        // Open memory stream for CSV
+        $file = fopen('php://output', 'w');
+        ob_start(); // Start output buffering
+        fputcsv($file, $csvHeader); // Add headers
+        foreach ($csvData as $row) {
+            fputcsv($file, $row);
+        }
+        fclose($file);
+
+        $csvOutput = ob_get_clean(); // Get CSV content
+
+        // Return CSV file as a response
+        return Response::make($csvOutput, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="user_logs.csv"',
+        ]);
     }
     public function signin()
     {
         return view("pages.signin");
     }
     public function signin_post(Request $request)
-    {
-        // Validate the request
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|min:6',
-        ], [
-            'email.exists' => "This email is not registered with AVOT."
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+        'password' => 'required|min:6',
+    ], [
+        'email.exists' => "This email is not registered with AVOT."
+    ]);
 
-        try {
+    try {
+        $credentials = $request->only('email', 'password');
+        $user = User::where("email", $request->email)->first();
 
-            // Attempt to authenticate the user
-            if (Auth::attempt($request->only(['email', 'password']))) {
-                $user = User::where("email", $request->email)->first();
-                if ($user->role_id == 1) {
-                    Auth::login($user);
-                    return response()->json(['message' => 'Logged In Successfully. ', 'redirect' => true, 'route' => route("dashboard"), 'status' => 200]);
-                } else {
-                    return response()->json(['message' => 'Unauthorized Access. ', 'status' => 201]);
-                }
-            } else {
-                return response()->json(['message' => 'Invalid credentials', 'status' => 201]);
-            }
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage(), 'status' => 201]);
+        if (!$user || $user->role_id != 1) {
+            return response()->json(['message' => 'Unauthorized Access.', 'status' => 401]);
         }
+
+        if (!Auth::guard('admin')->attempt($credentials)) {
+            return response()->json(['message' => 'Invalid credentials', 'status' => 401]);
+        }
+
+        // Debugging: Check if admin is authenticated
+        if (Auth::guard('admin')->check()) {
+            return response()->json([
+                'message' => 'Login Successful',
+                'status' => 200,
+                'user' => Auth::guard('admin')->user(), // Debugging
+                'redirect' => route('admin.dashboard')
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Auth Failed',
+                'status' => 403
+            ]);
+        }
+
+    } catch (\Throwable $th) {
+        return response()->json(['message' => $th->getMessage(), 'status' => 500]);
     }
+}
     public function profile()
     {
         $admin = auth()->user();
@@ -99,10 +156,10 @@ class AdminController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Password updated successfully']);
     }
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::guard("web")->logout();
-        return redirect(route("admin.login"));
+        Auth::guard('admin')->logout();
+        return redirect()->route('admin.login');
     }
 
     // all functions related to orders listing and order details

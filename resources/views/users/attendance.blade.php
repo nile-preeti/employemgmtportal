@@ -36,10 +36,56 @@
             font-size: 13px;
             margin-top: 5px;
         }
+
+        .header {
+            background: #064086;
+        }
+
+        .header img.logo {
+            background: #fff;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .dropdown-toggle::after {
+            color: #fff;
+        }
+
+        .profile-image {
+            border: 2px solid #4183d1;
+        }
+
+        
+
     </style>
 </head>
 
 <body>
+    <header class="header py-2">
+        <div class="container-fluid">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+
+                <a href="#"> <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="logo card-img-absolute" alt="circle-image" height="50px"></a>
+
+
+
+
+                <div class="dropdown text-end">
+                    <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image">
+                        <h6 class="m-0 p-0 text-light"> &nbsp; Profile</h6>
+                    </a>
+                    <ul class="dropdown-menu text-small" style="">
+                        <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" style="background: #e5e5e5">
         <div class="modal-dialog" role="document">
@@ -76,63 +122,57 @@
                         <div class="hrmodule-punching-controls-box">
                             {{-- <div class="punching-controls-icon">
                                 <img src="{{ asset('watch-icon.svg') }}">
-                            </div> --}}
-                            <div style="display: flex;justify-content:space-between">
-                                <h5>Name: <span id="name"></span></h5>
-                                <div class="text-center"><Button class="btn btn-danger"
-                                        onclick="logout()">Logout</Button></div>
-                            </div>
-                            <div class="punching-time">
-                                <span id="hours">00</span>:<span id="minutes">00</span>:<span
-                                    id="seconds">00</span>
-                            </div>
-                            <div class="hrmodule-punching-item-action">
-                                <div class="punching-btn">
-                                    <button id="checkinBtn" class="checkinBtn">Check-in</button>
-                                    <div class="info" id="checkinInfo"></div>
-                                </div>
-                                <div class="punching-btn">
-                                    <button id="checkoutBtn" class="checkoutBtn" disabled>Check-out</button>
-                                    <div class="info" id="checkoutInfo"></div>
-                                </div>
-                            </div>
-                            <div class="hrmodule-punching-item-action">
-                                <div class="punching-btn">
-                                    <a href="{{ route('user.attendance_records') }}"
-                                        style="text-decoration: underline">User
-                                        Attendance</a>
-
-                                </div>
-                                <div class="punching-btn">
-                                    <a href="{{ route('user.holidays') }}"
-                                        style="text-decoration: underline">Holidays</a>
-
+                        </div> --}}
+                        <div style="display: flex;justify-content:space-between">
+                            <!-- <div class="text-center"><a href="javascript:history.back()">
+                                    <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
+                            </div> -->
+                        </div>
+                        <div class="mb-4" style="display: flex;justify-content:space-between">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2"><a href="javascript:history.back()">
+                                    <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
                                 </div>
                             </div>
                         </div>
-                        <div class="hrmodule-table-card d-none">
-                            {{-- <button class="btn-bl mb-2" id="fetchRecordsBtn">Fetch Records</button> --}}
-                            <div class="crm-card-table table-responsive">
-                                <table id="recordsTable" class="table">
-                                    <thead>
-                                        <tr>
-                                            <th colspan="4">Date:{{ date('m-d-Y') }}</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Action</th>
-                                            <th>Time</th>
-                                            <th>Address</th>
-
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
+                        <div class="punching-time">
+                            <span id="hours">00</span>:<span id="minutes">00</span>:<span
+                                id="seconds">00</span>
+                        </div>
+                        <div class="hrmodule-punching-item-action">
+                            <div class="punching-btn">
+                                <button id="checkinBtn" class="checkinBtn">Check-in</button>
+                                <div class="info" id="checkinInfo"></div>
                             </div>
+                            <div class="punching-btn">
+                                <button id="checkoutBtn" class="checkoutBtn" disabled>Check-out</button>
+                                <div class="info" id="checkoutInfo"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hrmodule-table-card d-none">
+                        {{-- <button class="btn-bl mb-2" id="fetchRecordsBtn">Fetch Records</button> --}}
+                        <div class="crm-card-table table-responsive">
+                            <table id="recordsTable" class="table">
+                                <thead>
+                                    <tr>
+                                        <th colspan="4">Date:{{ date('m-d-Y') }}</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Time</th>
+                                        <th>Address</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -180,6 +220,7 @@
             document.getElementById("checkinBtn").addEventListener("click", () => startTimer(Date.now()));
 
             let user = @json($user);
+            console.log(user);
             const csrfToken = "{{ csrf_token() }}";
             // Show modal on page load
 
@@ -259,7 +300,8 @@
                         Swal.fire("Success", result.message, "success");
 
                     } else {
-                        alert(result.message);
+                        // alert(result.message);
+                        Swal.fire("Error", result.message, "error");
                     }
                 });
 
@@ -280,7 +322,7 @@
                         // checkoutBtn.disabled = true;
                         Swal.fire("Success", result.message, "success");
                     } else {
-                        alert(result.message);
+                        Swal.fire("Error", result.message, "error");
                     }
                 });
 
@@ -343,17 +385,21 @@
 
 
             // If user is logged in, proceed with map and buttons
-            user = JSON.parse(localStorage.getItem('user'));
+            user = @json($user);;
+            console.log(user);
             if (user) {
+
                 getLocation();
                 fetchRecords();
                 $("#name").text(user.name)
             }
 
             function fetchRecords() {
-                $.get("{{ route('user.attendance.fetch') }}" + "?id=" + user.id, function(data) {
+                $.get("{{ route('user.attendance.fetch.today') }}" + "?id=" + user.id, function(data) {
                     if (data.success) {
+
                         if (data.records) {
+                            console.log('data',data);
 
 
                             //     displayRecords(data.records);
@@ -396,7 +442,7 @@
 
         function logout() {
 
-            var title = ' you want to logout ?';
+            var title = 'Are you sure, you want to logout ?';
             Swal.fire({
                 title: '',
                 text: title,

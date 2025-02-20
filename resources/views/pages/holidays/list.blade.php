@@ -19,7 +19,7 @@
                                             <form class="mr-3 position-relative">
                                                 <div class="form-group mb-0">
                                                     <input type="search" class="form-control" name="search"
-                                                        placeholder="Search by  reason..." aria-controls="user-list-table">
+                                                        placeholder="Search by  name..." aria-controls="user-list-table">
                                                 </div>
                                             </form>
                                         </div>
@@ -34,16 +34,16 @@
 
                                             <a class="iq-bg-primary"
                                                 onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
-                                                data-toggle="modal" data-target=".CreateModel" href="#">Create</a>
+                                                data-toggle="modal" data-target=".CreateModel" href="#">Add Holiday</a>
                                         </div>
                                     </div>
                                 </div>
-                                <table id="user-list-table" class="table table-striped table-borderless mt-4" role="grid"
+                                <table id="user-list-table" class="table table-striped table-borderless mt-4 table-hover" role="grid"
                                     aria-describedby="user-list-page-info">
                                     <thead>
                                         <tr>
-                                            <th>SL.No.</th>
-                                            <th>Reason</th>
+                                            <th>S.No.</th>
+                                            <th>Name</th>
                                             <th>Day</th>
                                             <th>Date</th>
                                             <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
@@ -65,7 +65,7 @@
                                                     <a class="iq-bg-primary" data-toggle="modal"
    data-reason="{{ $item->reason ?? '' }}"
    data-date="{{ isset($item->date) ? \Carbon\Carbon::parse($item->date)->format('Y-m-d') : '' }}"
-   data-url="{{ route('holidayss.update', $item->id) }}"
+   data-url="{{ route('admin.holidayss.update', $item->id) }}"
    onclick="showData(this)" data-target="#EditModel"
    style="cursor: pointer">
    <i class="ri-pencil-fill"></i>
@@ -73,7 +73,7 @@
                                                         {{-- delete  button --}}
                                                         <a class="iq-bg-danger" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
-                                                            data-url="{{ route('holidayss.destroy', $item->id) }}"
+                                                            data-url="{{ route('admin.holidayss.destroy', $item->id) }}"
                                                             onclick="deletePublic(this)"><i
                                                                 class="ri-delete-bin-7-line"></i></a>
 
@@ -159,7 +159,7 @@
     <div class="modal fade CreateModel" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('holidayss.store') }}" method="post" id="create_form"
+                <form action="{{ route('admin.holidayss.store') }}" method="post" id="create_form"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
@@ -172,7 +172,7 @@
 
                         <div class="container-fluid">
                             <div class="form-group">
-                                <label for="name">Reason*</label>
+                                <label for="name">Name*</label>
                                 <input type="text" name="reason" class="form-control" required>
                             </div>
                             <div class="form-group">
@@ -195,7 +195,7 @@
     <div class="modal fade EditModel" tabindex="-1" role="dialog" aria-hidden="true" id="EditModel">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <form action="{{ route('holidayss.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
+                <form action="{{ route('admin.holidayss.store') }}" method="post" id="edit_form" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-header">
@@ -208,7 +208,7 @@
 
                         <div class="container-fluid">
                             <div class="form-group">
-                                <label for="name">Reason*</label>
+                                <label for="name">Name*</label>
                                 <input type="text" name="reason" id="name" class="form-control" required>
                             </div>
                             <div class="form-group">

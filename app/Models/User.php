@@ -23,6 +23,9 @@ class User extends Authenticatable
         'password',
         'designation',
         'phone',
+        'emp_id',
+        'role_id',
+        'status',
     ];
 
     /**
@@ -44,4 +47,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+
+    public function isAdmin()
+    {
+        return $this->role_id === 1; // Admins have role_id = 1
+    }
 }

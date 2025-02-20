@@ -71,7 +71,7 @@ h1, h2, h3, h4, h5, h6 {padding: 5px 0 15px 0;font-weight: normal;-webkit-font-s
     height: 100vh;
 }
 
-#map{    height: 100%;
+#map{position: absolute; left: 0; right: 0; top: 0; bottom: 0;    height: 100%;
     width: 100%;}
 
 .hrmodule-punching-section .container {
@@ -84,9 +84,10 @@ h1, h2, h3, h4, h5, h6 {padding: 5px 0 15px 0;font-weight: normal;-webkit-font-s
     padding: 10px 20px;
     font-size: 14px;
     border: none;
-    border-radius: 5px;
-    background-color:var(--blue);
+    border-radius: 50px;
+    background-color:#064086;
     color: white;
+    font-weight: 500;
     display: inline-block;
     width: 100%;
     position: relative;
@@ -94,8 +95,7 @@ h1, h2, h3, h4, h5, h6 {padding: 5px 0 15px 0;font-weight: normal;-webkit-font-s
 }
 
 .hrmodule-punching-item-action {
-    display: flex
-;
+    display: flex;
     gap: 10px;
     justify-content: space-between;
     margin-bottom: 1rem;
@@ -108,10 +108,10 @@ button.btn-bl {background: var(--blue); border: 1px solid var(--blue); padding: 
 
 .hrmodule-table-card {padding: 1rem; position: relative; }
 
- .hrmodule-punching-item {background-color: hsl(0deg 0% 100% / 75%); position: relative; padding: 0; border: 5px solid #fff; border-radius:20px; box-shadow: 0px 8px 13px 0px rgba(0, 0, 0, 0.05); backdrop-filter: blur(3px); }
+ .hrmodule-punching-item {background-color: hsl(0deg 0% 100% / 75%); position: relative; padding: 0; border: 5px solid #fff; border-radius:20px; box-shadow: 0px 8px 13px 0px rgba(0, 0, 0, 0.05); backdrop-filter: blur(3px); overflow:hidden; }
 
 .hrmodule-punching-controls-box{padding: 2rem; position: relative; text-align: center;}
-.punching-time {font-size: 35px; margin-bottom: 2rem; }
+.punching-time {font-size: 35px; margin-bottom: 2rem; color:#000; }
 
 
 .hrmodule-punching-item .card-header {padding: 10px; border: none; background:var(--Lighter1); border-radius: 10px 10px 0 0;     display: flex;
@@ -142,10 +142,37 @@ button.btn-bl {background: var(--blue); border: 1px solid var(--blue); padding: 
 .crm-card-table table tr td:first-child{border-left: 1px solid var(--border) !important;}
 .crm-card-table table tr td:last-child {border-right: 1px solid var(--border) !important;}
 
+button:disabled {
+        background-color: #ffffff !important;
+        cursor: not-allowed;
+        border: 1px solid #064086 !important;
+        color: #064086 !important;}
+
+.bg-gradient-danger{background-image: linear-gradient(310deg, #ff315a, #f56036);}
+.bg-gradient-success{background-image: linear-gradient(310deg, #54f9b2, #2dcecc);}
+.bg-gradient-warning{background-image: linear-gradient(310deg, #fa613e, #ffb33e);}
+.bg-gradient-warning-1{background-image: linear-gradient(310deg, #3410ca, #5f80ec);}
+
+
+.ic-dash img{height: 80px; background: #fff; padding: 14px; border-radius: 12px;}
+.card.card-img-holder {position: relative;}
+.card.card-img-holder .card-img-absolute {position: absolute; top: -170px; right: -14px; height: 440px;}
+.header {background:#064086; }
+.header img.logo {background: #fff; padding: 8px; border-radius: 6px;}
+.dropdown-toggle::after{color: #fff;}
+.profile-image{border: 2px solid #4183d1;}
+
+.punching-time{color: #000;}
+.backbtn-ovrlp{position: absolute; z-index: 9; top:12px; left: 12px;}
+.user-profile{height: 140px; border-radius: 24px;}
+
+.card.profile-form{border-radius: 14px;}
+
 
 /*
 Responsive 
 */
+
 @media (min-width:1200px) {
 }
 @media(max-width:1699px) {
@@ -179,8 +206,11 @@ Responsive
     
 }
 @media(max-width:767px) {
-    
+    .profile-name{display: none;}
+    .dropdown-toggle::after{display: none;} 
+    .sign-in-from{align-items: flex-start;}
 }
+
 @media(max-width:557px) {
     
 }
