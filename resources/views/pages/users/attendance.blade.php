@@ -1,3 +1,12 @@
+<style type="text/css">
+    button:disabled {
+        background-color: #ffffff !important;
+        cursor: not-allowed;
+        border: 1px solid #064086 !important;
+        color: #064086 !important;
+    }
+</style>
+
 @extends('layouts.app')
 @section('content')
 <!-- Page Content  -->
@@ -7,10 +16,10 @@
             <div class="col-sm-12">
                 <div class="iq-card">
                     <!-- <div class="iq-card-header d-flex justify-content-between">
-                                                                                                                          <div class="iq-header-title">
-                                                                                                                             <h4 class="card-title">User List</h4>
-                                                                                                                          </div>
-                                                                                                                       </div> -->
+                          <div class="iq-header-title">
+                             <h4 class="card-title">User List</h4>
+                          </div>
+                       </div> -->
                     <div class="iq-card-body">
                         <div class="">
                             <div class="row justify-content-between">
@@ -25,7 +34,7 @@
                                         </div>
                                     </div> --}}
 
-                                <div class="col-sm-4 col-md-4">
+                                    <div class="col-sm-4 col-md-4">
                                     <div class="user-list-files d-flex">
                                         <select class="form-control" id="selectcountry"
                                             onchange="changeStatus(this.value)">
@@ -115,20 +124,22 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="d-flex justify-content-end mt-3">
-                            <p><b>Total Working Days: {{ $totalWorkingDays }}</b></p>
+                        <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-end mt-3 data-cards">
+                                <p><b>Total Working Days: {{ $totalWorkingDays }}</b></p>
+                            </div>
+                            <div class="d-flex justify-content-end mt-3 data-cards">
+                                <p><b>Total Present: {{ $totalPresent }}</b></p>
+                            </div>
+                            <div class="d-flex justify-content-end mt-3 data-cards">
+                                <p><b>Total Absent: {{ $totalAbsent }}</b></p>
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-end mt-3">
-                            <p><b>Total Present: {{ $totalPresent }}</b></p>
-                        </div>
-                        <div class="d-flex justify-content-end mt-3">
-                            <p><b>Total Absent: {{ $totalAbsent }}</b></p>
-                        </div>
+
                         <div class="row justify-content-between mt-3">
                             <div id="user-list-page-info" class="col-md-6">
                                 {{-- <span>Showing 1 to 5 of 5 entries</span> --}}
                             </div>
-
                             <div class="col-md-6">
                                 <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-end mb-0">

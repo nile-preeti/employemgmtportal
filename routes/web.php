@@ -41,6 +41,8 @@ Route::group(['prefix' => 'admin', 'middleware' => 'auth:admin'], function () {
     // Fix: Add 'as' => 'admin.' to holidays resource  
     Route::resource("holidayss", HolidayController::class, ['as' => 'admin']);
 
+    Route::get('/download-logs', [AdminController::class, 'downloadLogs'])->name('download.logs');
+    Route::post('/users/import', [UserController::class, 'import'])->name('admin.import');
     Route::get("logout", [AdminController::class, 'logout'])->name("admin.logout");
 });
 
@@ -59,11 +61,18 @@ Route::prefix('user')->as("user.")->group(function () {
         // Route for updating attendance (Check-out)
         Route::post('/attendance/update', [AjaxController::class, 'updateAttendance'])->name('attendance.update');
         Route::get('/attendance/fetch', [AjaxController::class, 'fetchAttendance'])->name('attendance.fetch');
+        
+
+
+        Route::get('/attendance/fetch/today', [AjaxController::class, 'fetchAttendancetoday'])->name('attendance.fetch.today');
 
         //
         Route::get("attendance_records", [UserController::class, 'attendance_records'])->name("attendance_records");
         Route::get("holidays", [UserController::class, 'holidays'])->name("holidays");
         Route::get("profile", [UserController::class, 'profile'])->name("profile");
+
+        Route::get("emp-directory", [UserController::class, 'directory'])->name("directory");
+        Route::get("all-emp-directory", [AjaxController::class, 'Employeedirectory'])->name("employee.directory");
 
         Route::get("logout", [UserController::class, 'logout'])->name("logout");
 

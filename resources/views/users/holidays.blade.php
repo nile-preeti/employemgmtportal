@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('users/leaves.css') }}">
     <link rel="stylesheet" href="{{ asset('style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <style>
         body {
@@ -56,6 +57,7 @@
         <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('style.css') }}">
         <link rel="stylesheet" href="{{ asset('users/attendance_records.css') }}">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
         <style>
             body {
@@ -113,11 +115,10 @@
                     <div class="dropdown text-end">
                         <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image">
-                            <h6 class="m-0 p-0 text-light"> &nbsp; Profile</h6>
+                            <h6 class="m-0 p-0 text-light profile-name"> &nbsp; Profile</h6>
                         </a>
                         <ul class="dropdown-menu text-small" style="">
                             <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -131,8 +132,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()" style="font-size: 19px;text-decoration:underline">
-                                < Home</a> Holiday Calendar-{{date("Y")}}</h2>
+                        <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()"> <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"> </a> Holiday Calendar-{{date("Y")}}</h2>
                     </div>
                 </div>
                 <div class="row">
@@ -161,7 +161,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="att-divider"></div>
+                                <!-- <div class="att-divider"></div> -->
                                 @endforeach
 
 
@@ -175,6 +175,46 @@
                 </div>
             </div>
         </div>
+        <script>
+       function logout() {
+
+var title = 'Are you sure, you want to logout ?';
+Swal.fire({
+    title: '',
+    text: title,
+    // iconHtml: '<img src="{{ asset('assets/images/question.png') }}" height="25px">',
+    customClass: {
+        icon: 'no-border'
+    },
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes'
+}).then((result) => {
+    if (result.value) {
+
+        // localStorage.removeItem('user')
+        $.get("{{ route('user.logout') }}", function(data) {
+            if (data.success) {
+                Swal.fire("Success", "Logged out successfully", 'success').then((result) => {
+                    if (result.value) {
+
+                        location.replace("{{ route('user.login') }}");
+
+
+                    }
+                });
+            }
+        })
+
+
+    }
+
+})
+
+}
+    </script>
     </body>
 
     </html>

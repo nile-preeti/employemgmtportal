@@ -54,6 +54,9 @@
         .profile-image {
             border: 2px solid #4183d1;
         }
+
+        
+
     </style>
 </head>
 
@@ -74,7 +77,6 @@
                     </a>
                     <ul class="dropdown-menu text-small" style="">
                         <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -122,8 +124,15 @@
                                 <img src="{{ asset('watch-icon.svg') }}">
                         </div> --}}
                         <div style="display: flex;justify-content:space-between">
-                            <div class="text-center"><a href="javascript:history.back()" style="font-size: 19px;text-decoration:underline">
-                                    < Home</a>
+                            <!-- <div class="text-center"><a href="javascript:history.back()">
+                                    <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
+                            </div> -->
+                        </div>
+                        <div class="mb-4" style="display: flex;justify-content:space-between">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2"><a href="javascript:history.back()">
+                                    <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
+                                </div>
                             </div>
                         </div>
                         <div class="punching-time">
@@ -386,9 +395,11 @@
             }
 
             function fetchRecords() {
-                $.get("{{ route('user.attendance.fetch') }}" + "?id=" + user.id, function(data) {
+                $.get("{{ route('user.attendance.fetch.today') }}" + "?id=" + user.id, function(data) {
                     if (data.success) {
+
                         if (data.records) {
+                            console.log('data',data);
 
 
                             //     displayRecords(data.records);

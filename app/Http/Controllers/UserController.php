@@ -9,7 +9,14 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
+use App\Mail\EmployeeCredentialsMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Collection;
+use App\Imports\UsersImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -28,7 +35,7 @@ class UserController extends Controller
             ->when(request()->filled("status"), function ($query) {
                 return $query->where("status", request("status"));
             })
-            ->orderBy("id", "desc")
+            ->orderBy("emp_id", "desc")
             ->paginate(config("contant.paginatePerPage"));
 
         // Fetch attendance counts
@@ -53,7 +60,7 @@ class UserController extends Controller
         }
 
 
-        $title = "User Management";
+        $title = "Employee Management";
 
         return view("pages.users.index", compact("title", 'users', 'search'));
     }
@@ -65,6 +72,7 @@ class UserController extends Controller
             'password' => 'required',
             'designation' => 'required',
             'phone' => 'required',
+            'emp_id' => 'required| unique:users,emp_id'
 
 
         ]);
@@ -76,85 +84,169 @@ class UserController extends Controller
         $user->image = $request->image;
         $user->designation = $request->designation;
         $user->phone = $request->phone;
+        $user->emp_id = $request->emp_id;
 
         $user->status = $request->status;
 
         $user->password = Hash::make($request->password);
         $user->save();
+        $password = $request->password;
 
-        return response()->json(['success' => true, 'message' => "User Created Successfully"]);
+        // Mail::to($user->email)->send(new EmployeeCredentialsMail($user, $password));
+
+        return response()->json(['success' => true, 'message' => "Employee Created Successfully"]);
     }
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|exists:users,email',
-            'designation' => 'required',
-            'phone' => 'required',
+{
+    $request->validate([
+        'name' => 'required',
+        'email' => [
+            'required',
+            Rule::unique('users', 'email')->ignore($id), // Allow current user's email
+        ],
+        'designation' => 'required',
+        'phone' => 'required',
+        'emp_id' => [
+            'required',
+            Rule::unique('users', 'emp_id')->ignore($id), // Allow the current user's emp_id
+        ],
+    ]);
 
-
-        ]);
-
-        $user =  User::find($id);
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->image = $request->image;
-        $user->designation = $request->designation;
-        $user->phone = $request->phone;
-        $user->status = $request->status;
-
-        if ($request->has("password")) {
-            $user->password = Hash::make($request->password);
-        }
-
-        $user->save();
-        return response()->json(['success' => true, 'message' => "User Updated Successfully"]);
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['success' => false, 'message' => "User not found"]);
     }
+
+    $user->name = $request->name;
+    $user->email = $request->email;
+    $user->image = $request->image;
+    $user->designation = $request->designation;
+    $user->phone = $request->phone;
+    $user->status = $request->status;
+    $user->emp_id = $request->emp_id;
+
+    // **Preserve existing password if not provided**
+    if ($request->filled('password')) {
+        $user->password = Hash::make($request->password);
+    }
+
+    $user->save();
+
+    return response()->json(['success' => true, 'message' => "Employee Updated Successfully"]);
+}
+
 
     public function  destroy($id)
     {
         $user = User::find($id);
         if ($user) {
             $user->delete();
-            return response()->json(['success' => true, 'message' => "User deleted successfully"]);
+            return response()->json(['success' => true, 'message' => "Employee deleted successfully"]);
         }
-        return response()->json(['success' => false, 'message' => "User does not exists"]);
+        return response()->json(['success' => false, 'message' => "Employee does not exists"]);
     }
     // user end routes
-    public function userAttendance($id)
-    {
-        $query = Attendance::where('user_id', $id);
+    public function userAttendance(Request $request, $id)
+{
+    $month = request('month', date('m'));
+    $year = request('year', date('Y'));
+    $statusFilter = $request->query('status'); // Store status filter separately
 
-        // Get the selected month or use the current month by default
-        $month = request('month', date('m'));
-        $year = request('year', date('Y'));
+    // Fetch attendance records
+    $attendanceRecords = Attendance::where('user_id', $id)
+        ->whereMonth('date', $month)
+        ->whereYear('date', $year)
+        ->when($statusFilter, function ($query) use ($statusFilter) {
+            return $query->where('status', $statusFilter);
+        })
+        ->get()
+        ->keyBy('date'); // Store by date for quick lookup
 
-        // Filter by month and year
-        $query->whereMonth('date', $month)->whereYear('date', $year);
+    $title = "Employee Attendance Records";
+    $holidays = Holiday::whereMonth('date', $month)->whereYear('date', $year)->pluck('date')->toArray();
+    
+    $allDays = [];
+    $startDate = Carbon::createFromDate($year, $month, 1);
+    $endDate = $startDate->copy()->endOfMonth();
+    $currentDate = Carbon::now()->format('Y-m-d');
 
-        // Apply status filter
-        if (request()->has("status")) {
-            $query->where("status", request("status"));
+    for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+        $formattedDate = $date->format('Y-m-d');
+
+        if (isset($attendanceRecords[$formattedDate])) {
+            $record = $attendanceRecords[$formattedDate];
+            $recordStatus = $record->status; // Use a separate variable
+
+            $allDays[] = [
+                'date' => $formattedDate,
+                'check_in_time' => $record->check_in_time,
+                'check_in_full_address' => $record->check_in_full_address,
+                'check_out_time' => $record->check_out_time,
+                'check_out_full_address' => $record->check_out_full_address,
+                'status' => $recordStatus
+            ];
+        } else {
+            if (in_array($formattedDate, $holidays)) {
+                $recordStatus = 'Holiday';
+            } elseif ($date->isWeekend()) {
+                $recordStatus = 'Weekly Off';
+            } elseif ($formattedDate > $currentDate) {
+                $recordStatus = 'N/A';
+            } else {
+                $recordStatus = 'Absent';
+            }
+
+            $allDays[] = [
+                'date' => $formattedDate,
+                'check_in_time' => null,
+                'check_in_full_address' => null,
+                'check_out_time' => null,
+                'check_out_full_address' => null,
+                'status' => $recordStatus
+            ];
         }
-
-        // Paginate attendance records
-        $data = $query->orderBy("id", "desc")->paginate(10);
-
-        // Calculate total working days for the current or selected month
-        $totalWorkingDays = Attendance::where('user_id', $id)
-                            ->whereMonth('date', $month)
-                            ->whereYear('date', $year)
-                            ->whereIn('status', ['Present', 'Half-day']) // Ensure correct status value
-                            ->selectRaw("SUM(CASE WHEN status = 'Present' THEN 1 WHEN status = 'Half-day' THEN 0.5 ELSE 0 END) as total_days")
-                            ->value('total_days');
-        // dd($totalWorkingDays);
-
-        $totalWorkingDays = $totalWorkingDays ?? 0; // Default to 0 if null
-
-        $title = "Employee attendance records";
-
-        return view("pages.users.attendance", compact("data", "title", "totalWorkingDays"));
     }
+
+    // Apply status filter after processing
+    if ($statusFilter) {
+        $allDays = array_filter($allDays, function ($day) use ($statusFilter) {
+            return $day['status'] === $statusFilter;
+        });
+    }
+
+    // Paginate the data
+    $perPage = 10;
+    $currentPage = request()->get('page', 1);
+    $allDaysPaginated = new LengthAwarePaginator(
+        collect($allDays)->slice(($currentPage - 1) * $perPage, $perPage)->values(),
+        count($allDays),
+        $perPage,
+        $currentPage,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+
+    // Calculate attendance summary
+    $totalWorkingDays = collect($allDays)->filter(function ($day) {
+        return !in_array($day['status'], ['Holiday', 'Weekly Off', 'N/A']);
+    })->count();
+
+    $totalPresent = collect($allDays)->sum(function ($day) {
+        return $day['status'] === 'Present' ? 1 : ($day['status'] === 'Half-day' ? 0.5 : 0);
+    });
+
+    $totalHalfDay = collect($allDays)->where('status', 'Half-day')->count();
+    $totalAbsent = collect($allDays)->where('status', 'Absent')->count();
+
+    return view("pages.users.attendance", compact(
+        "allDaysPaginated",
+        "totalWorkingDays",
+        "totalPresent",
+        "totalHalfDay",
+        "totalAbsent",
+        "title"
+    ));
+}
+
 
     public function attendance()
     {
@@ -177,11 +269,11 @@ class UserController extends Controller
         // Validate the input
         $request->validate([
             'password' => 'required',
-            'email' => 'required|exists:users,email',
+            'emp_id' => 'required|exists:users,emp_id',
         ]);
 
-        $credentials = $request->only('email', 'password');
-        $user = User::where('email', $request->email)->first();
+        $credentials = $request->only('emp_id', 'password');
+        $user = User::where('emp_id', $request->emp_id)->first();
 
         // Check if the user exists
         if ($user) {
@@ -191,11 +283,11 @@ class UserController extends Controller
                 if (Auth::guard('web')->attempt($credentials)) {
                     return response()->json([
                         'status' => 'success',
-                        'redirect' => true,
-                        'route' => route("user.dashboard"),
+                        'redirect' => route("user.dashboard"),
                         'message' => "User logged in successfully",
                         'user' => $user
                     ]);
+                    
                 } else {
                     return response()->json([
                         'status' => 'error',
@@ -257,5 +349,22 @@ class UserController extends Controller
     public function profile(Request $request)
     {
         return view("users.profile");
+    }
+
+    public function directory(Request $request)
+    {
+        $user = Auth::user();
+        return view("users.directory",compact('user'));
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        Excel::import(new UsersImport, $request->file('file'));
+
+        return redirect()->back()->with('success', 'Users imported successfully.');
     }
 }

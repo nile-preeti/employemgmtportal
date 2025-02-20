@@ -65,14 +65,14 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <form class="position-relative mr-5">
                                     <div class="form-group mb-0">
-                                        <a class="btn btn-primary iq-bg-primary text-light" href="#"><i
-                                                class="ri-download-line"></i>
-                                            &nbsp; Download Logs</a>
+                                    <a class="btn btn-primary iq-bg-primary text-light rounded-pill py-2 px-3" href="{{ route('download.logs') }}">
+                                        <i class="ri-download-line"></i> &nbsp; Download Logs
+                                    </a>
                                     </div>
                                 </form>
 
                                 <div class="form-group mb-0">
-                                        <a class="btn btn-primary iq-bg-primary text-light mr-4" href="{{ route('admin.users.index') }}">
+                                        <a class="btn btn-primary iq-bg-primary text-light mr-4 rounded-pill py-2 px-3" href="{{ route('admin.users.index') }}">
                                             &nbsp; View All</a>
                                     </div>
                                 <div class="todo-date d-flex mr-3">
@@ -101,6 +101,7 @@
                                 <table class="table mb-0 table-borderless">
                                     <thead>
                                         <tr>
+                                            <th>Emp Id</th>
                                             <th> Name</th>
                                             <th> Email</th>
                                             <th>Designation</th>
@@ -111,6 +112,7 @@
                                     <tbody>
                                         @forelse ($users as $item)
                                             <tr>
+                                            <td>{{$item->emp_id ?? 'N/A'}}</td>
                                                 <td>
                                                     {{ $item->name }}
                                                 </td>

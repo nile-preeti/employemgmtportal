@@ -14,7 +14,7 @@
                         <div class="iq-card-body">
                             <div class="">
                                 <div class="row justify-content-between">
-                                    <div class="col-sm-12 col-md-6">
+                                    <div class="col-sm-12 col-md-5">
                                         <div id="user_list_datatable_info" class="dataTables_filter">
                                             <form class="mr-3 position-relative">
                                                 <div class="form-group mb-0">
@@ -29,10 +29,10 @@
                                             onclick="window.location.href = window.location.origin + window.location.pathname;"><img
                                                 src="{{ asset('reset.png') }}" height="20" alt=""></span>
                                     </div>
-                                    <div class="col-sm-12 col-md-5">
+                                    <div class="col-sm-12 col-md-6">
                                         <div class="user-list-files d-flex">
                                             <select class="form-control" id="selectcountry"
-                                                onchange="changeStatus(this.value)">
+                                                onchange="changeStatus(this.value)" style="width: 55%;">
                                                 <option value="">--Filter By Status--</option>
                                                 <option value="1" @if (request()->has('status') && request('status') == 1) selected @endif>
                                                     Active </option>
@@ -44,7 +44,11 @@
 
                                             <a class="iq-bg-primary"
                                                 onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
-                                                data-toggle="modal" data-target=".CreateModel" href="#">Add Employee</a>
+                                                data-toggle="modal" data-target=".CreateModel" href="#" style="margin-right:10px;">Add Employee</a>
+
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#importExcelModal">
+                                                    Import Excel
+                                                </button>
                                         </div>
                                     </div>
                                 </div>
@@ -325,6 +329,26 @@
             </div>
         </div>
     </div>
+      <!-- Import Excel Modal -->
+        <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importExcelModalLabel">Import Employees</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="importExcelForm" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="file" name="file" class="form-control" required accept=".xlsx,.xls,.csv">
+                            <button type="submit" class="btn btn-success mt-3 w-100">Import</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 @push('js')
     <script>
@@ -579,7 +603,7 @@
         }
 
         function deletePublic(ele) {
-            var title = ' you want to delete this category ?';
+            var title = ' you want to delete this employee ?';
             Swal.fire({
                 title: '',
                 text: title,
@@ -725,4 +749,48 @@
             return myDropzone;
         }
     </script>
+    <script>
+$(document).ready(function() {
+    $("#importExcelForm").on("submit", function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+        
+        $.ajax({
+            url: "{{ route('admin.import') }}",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                Swal.fire({
+                    title: "Importing...",
+                    text: "Please wait while we import the data.",
+                    icon: "info",
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+            },
+            success: function(response) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Employees imported successfully.",
+                    icon: "success",
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload(); // Refresh the page
+                });
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    title: "Error!",
+                    text: xhr.responseJSON.message || "Something went wrong.",
+                    icon: "error"
+                });
+            }
+        });
+    });
+});
+</script>
 @endpush

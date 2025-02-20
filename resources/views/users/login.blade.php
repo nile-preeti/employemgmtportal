@@ -42,12 +42,12 @@
                         <div class="sign-in-from">
                            
                             <h1 class="mb-0 dark-signin">Employee Login</h1>
-                            <p>Enter your email address and password to access user panel.</p>
+                            <p>Enter your Emp Id and password to access user panel.</p>
                             <form class="mt-4" id="signin_form" enctype="multipart/form-data" action="{{route('user.login_post')}}" method="POST">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Registration Email ID</label>
-                                    <input type="email" name="email" class="form-control mb-0" id="exampleInputEmail1" placeholder="Enter email">
+                                    <label for="exampleInputEmail1">Emp Id</label>
+                                    <input type="text" name="emp_id" class="form-control mb-0" id="exampleInputEmail1" placeholder="Enter emp id">
                                 </div>
                                 <div class="form-group">
                                     <label for="exampleInputPassword1">Enter Your Password</label>
@@ -101,10 +101,10 @@
         $(document).ready(function() {
             $('#signin_form').validate({
                 rules: {
-                    email: {
+                    emp_id: {
                         required: true,
-                        maxlength: 191,
-                        email: true
+                        maxlength: 4,
+                        digits: true
                     },
                     password: {
                         required: true,
@@ -146,8 +146,8 @@
 
                                 }).then((result) => {
 
-                                    if (response.redirect == true) {
-                                        window.location = response.route;
+                                    if (response.redirect) {
+                                        window.location.href = response.redirect;
                                     }
                                     // var url = $('#redirect_url').val();
                                     // if (url !== undefined || url != null) {

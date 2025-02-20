@@ -276,4 +276,58 @@ class AjaxController extends Controller
 
 
     
+
+
+    public function fetchAttendancetoday(Request $request)
+    {
+        if ($request->has("id")) {
+            $id = $request->id;
+            $user = User::find($id);
+            if ($user) {
+                $records = Attendance::where("user_id", $id)->orderBy("id", "desc")->get();
+                foreach ($records as $item) {
+                    $item->check_in_time = date("H:i", strtotime($item->check_in_time));
+                    $item->check_out_time = date("H:i", strtotime($item->check_out_time));
+                }
+                $today = Attendance::where("user_id", $id)->whereDate("date", now())->orderBy("id", "desc")->first();
+                if ($today) {
+                    $today->check_in_time = !empty($today->check_in_time) 
+                        ? date("H:i", strtotime($today->check_in_time)) 
+                        : 'N/A';
+                
+                    $today->check_out_time = !empty($today->check_out_time) 
+                        ? date("H:i", strtotime($today->check_out_time)) 
+                        : 'N/A';
+                }
+                
+                return response()->json(['success' => true, 'records' => $records, 'today' => $today]);
+            }
+        }
+
+        return response()->json(['success' => false, 'message' => 'user does not exists']);
+    }
+
+
+    public function Employeedirectory(Request $request)
+    {
+        $perPage = 10; // Number of records per page
+        $page = $request->input('page', 1);
+
+        $employees = User::where('role_id', 2)
+            ->where('status', 1)
+            ->select('id', 'name', 'email', 'emp_id', 'designation', 'phone')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'success' => true,
+            'employees' => $employees->items(),
+            'current_page' => $employees->currentPage(),
+            'last_page' => $employees->lastPage(),
+            'total' => $employees->total(),
+        ]);
+    }
+
+
+
+    
 }

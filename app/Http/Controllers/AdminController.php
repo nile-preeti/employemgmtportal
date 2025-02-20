@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Response;
 use App\Models\Holiday;
 
 class AdminController extends Controller
@@ -24,6 +25,47 @@ class AdminController extends Controller
         
     
         return view("pages.dashboard", compact("users" ,"totalHolidays"));
+    }
+
+
+    public function downloadLogs()
+    {
+        // Fetch users where status = 1 and role_id = 2
+        $users = User::where('status', 1)->where('role_id', 2)->orderby('id','DESC')->get();
+
+        // Define CSV headers
+        $csvHeader = ['S.No.','Emp ID', 'Name', 'Email', 'Phone', 'Designation'];
+        
+        // Convert users data to CSV format
+        $csvData = [];
+        $serialNo = 1;
+        foreach ($users as $user) {
+            $csvData[] = [
+                $serialNo++,
+                $user->emp_id ?? 'N/A',
+                $user->name ?? 'N/A',
+                $user->email ?? 'N/A' ,
+                $user->phone ?? 'N/A',
+                $user->designation ?? 'N/A',
+            ];
+        }
+
+        // Open memory stream for CSV
+        $file = fopen('php://output', 'w');
+        ob_start(); // Start output buffering
+        fputcsv($file, $csvHeader); // Add headers
+        foreach ($csvData as $row) {
+            fputcsv($file, $row);
+        }
+        fclose($file);
+
+        $csvOutput = ob_get_clean(); // Get CSV content
+
+        // Return CSV file as a response
+        return Response::make($csvOutput, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="user_logs.csv"',
+        ]);
     }
     public function signin()
     {

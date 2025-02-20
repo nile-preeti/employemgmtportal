@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('style.css') }}">
     <link rel="stylesheet" href="{{ asset('users/attendance_records.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <style>
         body {
@@ -105,11 +106,10 @@
                 <div class="dropdown text-end">
                     <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image">
-                        <h6 class="m-0 p-0 text-light"> &nbsp; Profile</h6>
+                        <h6 class="m-0 p-0 text-light profile-name"> &nbsp; Profile</h6>
                     </a>
                     <ul class="dropdown-menu text-small" style="">
                         <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -123,13 +123,42 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()" style="font-size: 19px;text-decoration:underline">
-                            < Home</a> Attendance Record</h2>
+                    <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()"><img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"> </a>Attendance Record</h2>
                 </div>
                 <div class="row">
-                    <ul id="recordsList" style="padding-left: 50px;list-style: none;">
+        <!-- Month & Year Filter -->
+        <div class="col-md-4">
+            <label for="month">Select Month:</label>
+            <select id="month" class="form-control">
+                <option value="01">January</option>
+                <option value="02">February</option>
+                <option value="03">March</option>
+                <option value="04">April</option>
+                <option value="05">May</option>
+                <option value="06">June</option>
+                <option value="07">July</option>
+                <option value="08">August</option>
+                <option value="09">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+    <label for="year">Select Year:</label>
+    <input type="number" id="year" class="form-control" min="2000" max="2050">
+</div>
+
+        <div class="col-md-4">
+            <button class="btn btn-primary mt-4" onclick="fetchAttendance(1)">Filter</button>
+        </div>
+    </div>
+
+                <div class="row">
+                    <ol id="recordsList" style="padding-left: 50px;list-style: none;">
                         <!-- Dynamic content will be added here by the JavaScript -->
-                    </ul>
+                    </ol>
 
                     <div id="pagination-controls" class="d-flex justify-content-end">
                         <button id="prev-page" onclick="changePage('prev')" disabled>Previous</button>
@@ -296,6 +325,7 @@ function displayRecords(records) {
 
 
 // Function to update pagination controls
+// Function to update pagination controls
 function updatePaginationControls() {
     const paginationControls = document.getElementById("pagination-controls");
     const pageInfo = document.getElementById("page-info");
@@ -307,9 +337,13 @@ function updatePaginationControls() {
     prevButton.disabled = currentPage <= 1;
     nextButton.disabled = currentPage >= lastPage;
 
-    // Hide pagination if there's only one page
-    paginationControls.style.display = lastPage <= 1 ? "none" : "flex";
+    if (lastPage <= 1) {
+        paginationControls.style.cssText = "display: none !important;"; // Force hide
+    } else {
+        paginationControls.style.cssText = "display: flex !important;"; // Force show
+    }
 }
+
 
 // Function to change the page
 function changePage(direction) {
@@ -348,46 +382,130 @@ if (user) {
     window.location = "{{ route('user.dashboard') }}";
 }
     </script>
-
 <script>
+       function logout() {
+
+var title = 'Are you sure, you want to logout ?';
+Swal.fire({
+    title: '',
+    text: title,
+    // iconHtml: '<img src="{{ asset('assets/images/question.png') }}" height="25px">',
+    customClass: {
+        icon: 'no-border'
+    },
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes'
+}).then((result) => {
+    if (result.value) {
+
+        // localStorage.removeItem('user')
+        $.get("{{ route('user.logout') }}", function(data) {
+            if (data.success) {
+                Swal.fire("Success", "Logged out successfully", 'success').then((result) => {
+                    if (result.value) {
+
+                        location.replace("{{ route('user.login') }}");
+
+
+                    }
+                });
+            }
+        })
+
+
+    }
+
+})
+
+}
+    </script>
+    <script>
     document.addEventListener("DOMContentLoaded", function () {
-        populateMonthFilter();
-        fetchAttendance(); // Load attendance data initially
+        let today = new Date();
+        let currentMonth = String(today.getMonth() + 1).padStart(2, '0'); // Get month (01-12)
+        let currentYear = today.getFullYear();
+
+        // Set current month
+        document.getElementById("month").value = currentMonth;
+
+        // Populate year dropdown (from 2020 to current year + 5)
+        let yearSelect = document.getElementById("year");
+        let startYear = 2020;
+        let endYear = currentYear + 5;
+        
+        for (let year = startYear; year <= endYear; year++) {
+            let option = document.createElement("option");
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) {
+                option.selected = true; // Select current year
+            }
+            yearSelect.appendChild(option);
+        }
+    });
+</script>
+   <script>
+    $(document).ready(function () {
+        let currentYear = new Date().getFullYear();
+        let yearDropdown = $("#year");
+
+        // Populate year dropdown (5 years back to 2 years ahead)
+        for (let i = currentYear - 5; i <= currentYear + 2; i++) {
+            yearDropdown.append(`<option value="${i}" ${i === currentYear ? 'selected' : ''}>${i}</option>`);
+        }
+
+        // Auto-fetch attendance for current month & year
+        fetchAttendance(1);
     });
 
-    function populateMonthFilter() {
-        const monthFilter = document.getElementById("monthFilter");
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
-        const currentYear = currentDate.getFullYear();
+    function fetchAttendance(page = 1) {
+    let userId = 1; // Replace with actual user ID
+    let selectedMonth = $("#month").val();
+    let selectedYear = $("#year").val();
 
-        for (let i = 0; i < 12; i++) {
-            const date = new Date(currentYear, currentMonth - 1 - i, 1);
-            const monthValue = date.toISOString().slice(0, 7); // Format YYYY-MM
-            const monthText = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    $.ajax({
+        url: "{{ route('user.attendance.fetch') }}",
+        type: "GET",
+        data: {
+            id: userId,
+            month: selectedMonth,
+            year: selectedYear,
+            page: page
+        },
+        success: function (response) {
+            if (response.success) {
+                displayRecords(response.records); // Use the displayRecords function
 
-            const option = new Option(monthText, monthValue);
-            if (monthValue === `${currentYear}-${String(currentMonth).padStart(2, '0')}`) {
-                option.selected = true;
+                $("#page-info").text(`Page ${response.current_page} of ${response.last_page}`);
+                $("#prev-page").prop("disabled", response.current_page === 1);
+                $("#next-page").prop("disabled", response.current_page === response.last_page);
+
+                currentPage = response.current_page;
+                lastPage = response.last_page; // Ensure lastPage is updated
+                updatePaginationControls(); // Keep pagination controls updated
+            } else {
+                alert(response.message);
             }
-            monthFilter.appendChild(option);
+        }
+    });
+}
+
+    function changePage(direction) {
+        if (direction === "next") {
+            fetchAttendance(currentPage + 1);
+        } else if (direction === "prev" && currentPage > 1) {
+            fetchAttendance(currentPage - 1);
         }
     }
-
-    function fetchAttendance(page = 1) {
-        const userId = 1; // Replace with dynamic user ID
-        const selectedMonth = document.getElementById("monthFilter").value;
-
-        fetch(`/fetch-attendance?id=${userId}&month=${selectedMonth}&page=${page}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displayRecords(data.records);
-                    updatePagination(data.current_page, data.last_page);
-                }
-            })
-            .catch(error => console.error("Error fetching attendance:", error));
-    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let currentYear = new Date().getFullYear();
+        document.getElementById("year").value = currentYear;
+    });
 </script>
 </body>
 
