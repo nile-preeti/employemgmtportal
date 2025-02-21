@@ -12,6 +12,8 @@
     <script src="{{ asset('plugins/bootstrap/js/bootstrap.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
     <style>
         body {
             margin: 0;
@@ -33,8 +35,10 @@
 
         .info {
             text-align: center;
-            font-size: 13px;
+            font-size: 14px;
             margin-top: 5px;
+            color: #000;
+            font-weight: 500;
         }
 
         .header {
@@ -55,6 +59,40 @@
             border: 2px solid #4183d1;
         }
 
+        .ic-arrow-left {
+            padding: 6px;
+            border-radius: 8px;
+            border: 2px solid #064086;
+            margin-right: 12px;
+            background: #fff;
+        }
+
+        .swal2-confirm{
+                background-color: #ffffff !important;
+                border: 1px solid #064086 !important;
+                color: #064086 !important;
+                padding: 9px 30px;
+                border-radius: 50px;
+            } 
+
+            .swal2-confirm:hover{background: #fff !important;}
+
+            .swal2-cancel {    padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 50px;
+                background-color: #064086 !important;
+                color: white;
+                font-weight: 500;
+                display: inline-block;
+            }
+           
+            div#swal2-html-container {
+                color: #000;
+                font-weight: 500;
+            }
+
+            .swal2-popup.swal2-modal.swal2-show{padding: 40px;}
         
 
     </style>
@@ -67,13 +105,10 @@
 
                 <a href="#"> <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="logo card-img-absolute" alt="circle-image" height="50px"></a>
 
-
-
-
                 <div class="dropdown text-end">
                     <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image">
-                        <h6 class="m-0 p-0 text-light"> &nbsp; Profile</h6>
+                        <h6 class="m-0 p-0 text-light profile-name"> &nbsp; Profile</h6>
                     </a>
                     <ul class="dropdown-menu text-small" style="">
                         <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
@@ -83,6 +118,7 @@
                         <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
                     </ul>
                 </div>
+
             </div>
         </div>
     </header>
@@ -117,24 +153,31 @@
             <div class="container">
 
                 <div class="hrmodule-punching-item">
+                    <div class="backbtn-ovrlp text-center"><a href="javascript:history.back()">
+                        <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
+                    </div>
+
                     <div id="map"></div>
                     <div class="controls">
                         <div class="hrmodule-punching-controls-box">
                             {{-- <div class="punching-controls-icon">
                                 <img src="{{ asset('watch-icon.svg') }}">
                         </div> --}}
-                        <div style="display: flex;justify-content:space-between">
+                        <div style="display: flex;justify-content:center;">
                             <!-- <div class="text-center"><a href="javascript:history.back()">
                                     <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
                             </div> -->
                         </div>
-                        <div class="mb-4" style="display: flex;justify-content:space-between">
-                            <div class="d-flex align-items-center">
+                        <div class="mb-3" style="display: flex;justify-content:center;">
+                        
+                            <!-- <div class="d-flex align-items-center">
                                 <div class="me-2"><a href="javascript:history.back()">
                                     <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
                                 </div>
-                            </div>
+                            </div> -->
+                            <img src="https://nileprojects.in/hrmodule/public/assets/images/ic-clock.png" class="" height="130px"></a>
                         </div>
+                        <p class="info"> {{ \Carbon\Carbon::now()->format('d M Y') }}</p>
                         <div class="punching-time">
                             <span id="hours">00</span>:<span id="minutes">00</span>:<span
                                 id="seconds">00</span>
@@ -397,9 +440,7 @@
             function fetchRecords() {
                 $.get("{{ route('user.attendance.fetch.today') }}" + "?id=" + user.id, function(data) {
                     if (data.success) {
-
                         if (data.records) {
-                            console.log('data',data);
 
 
                             //     displayRecords(data.records);

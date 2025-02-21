@@ -14,7 +14,7 @@
                         <div class="iq-card-body">
                             <div class="">
                                 <div class="row justify-content-between">
-                                    <div class="col-sm-12 col-md-5">
+                                    <div class="col-sm-12 col-md-4 col-lg-4">
                                         <div id="user_list_datatable_info" class="dataTables_filter">
                                             <form class="mr-3 position-relative">
                                                 <div class="form-group mb-0">
@@ -24,31 +24,32 @@
                                             </form>
                                         </div>
                                     </div>
-                                    <div class="col-md-1">
-                                        <span style="cursor:pointer;padding-top:10px"
+                                    <div class="col-md-1 col-lg-1">
+                                        <div class="btn-reload" style="cursor:pointer;padding-top:10px"
                                             onclick="window.location.href = window.location.origin + window.location.pathname;"><img
-                                                src="{{ asset('reset.png') }}" height="20" alt=""></span>
+                                                src="{{ asset('reset.png') }}" height="20" alt=""></div>
                                     </div>
-                                    <div class="col-sm-12 col-md-6">
-                                        <div class="user-list-files d-flex">
+                                    <div class="col-sm-12 col-md-7 col-lg-7">
+                                        <div class=" d-flex">
                                             <select class="form-control" id="selectcountry"
-                                                onchange="changeStatus(this.value)" style="width: 55%;">
+                                                onchange="changeStatus(this.value)" style="width: 47%;">
                                                 <option value="">--Filter By Status--</option>
                                                 <option value="1" @if (request()->has('status') && request('status') == 1) selected @endif>
                                                     Active </option>
-
                                                 <option value="0" @if (request()->has('status') && request('status') == 0) selected @endif>
                                                     Inactive </option>
-
                                             </select>
 
-                                            <a class="iq-bg-primary"
+                                            <button class="ml-4 px-2 btn btn-primary iq-bg-primary text-light rounded-pill "
                                                 onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
-                                                data-toggle="modal" data-target=".CreateModel" href="#" style="margin-right:10px;">Add Employee</a>
+                                                data-toggle="modal" data-target=".CreateModel" style="margin-right:10px;">Add Employee</button>
 
-                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#importExcelModal">
+                                                <button type="button" class="ml-2 px-2 btn btn-primary iq-bg-primary text-light rounded-pill " data-toggle="modal" data-target="#importExcelModal">
                                                     Import Excel
                                                 </button>
+                                                <a href="{{ asset('/uploads/files/employees.xlsx') }}" class="ml-2 px-2 btn btn-primary iq-bg-primary text-light rounded-pill" download style="padding:11px;">
+                                                <i class="fa fa-download" style="padding:2px;"></i>
+                                                </a>
                                         </div>
                                     </div>
                                 </div>
@@ -99,7 +100,7 @@
                                                             data-url="{{ route('admin.users.destroy', $item->id) }}"
                                                             onclick="deletePublic(this)"><i
                                                                 class="ri-delete-bin-7-line"></i></a>
-                                                        <a class="iq-bg-danger" data-id="{{ $item->id }}"
+                                                        <a class="iq-bg-info" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
                                                             href="{{ route('admin.userAttendance', $item->id) }}"><i
                                                                 class="ri-eye-fill"></i></a>

@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Mail\EmployeeCredentialsMail;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Collection;
 use App\Imports\UsersImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Mail\EmployeeCredentialsMail;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -90,51 +90,42 @@ class UserController extends Controller
 
         $user->password = Hash::make($request->password);
         $user->save();
-        $password = $request->password;
-
         // Mail::to($user->email)->send(new EmployeeCredentialsMail($user, $password));
 
         return response()->json(['success' => true, 'message' => "Employee Created Successfully"]);
     }
     public function update(Request $request, $id)
-{
-    $request->validate([
-        'name' => 'required',
-        'email' => [
-            'required',
-            Rule::unique('users', 'email')->ignore($id), // Allow current user's email
-        ],
-        'designation' => 'required',
-        'phone' => 'required',
-        'emp_id' => [
-            'required',
-            Rule::unique('users', 'emp_id')->ignore($id), // Allow the current user's emp_id
-        ],
-    ]);
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => [
+                'required',
+                Rule::unique('users', 'email')->ignore($id), // Allow current user's email
+            ],
+            'designation' => 'required',
+            'phone' => 'required',
+            'emp_id' => [
+                'required',
+                Rule::unique('users', 'emp_id')->ignore($id), // Allow the current user's emp_id
+            ],
+        ]);
 
-    $user = User::find($id);
-    if (!$user) {
-        return response()->json(['success' => false, 'message' => "User not found"]);
+        $user =  User::find($id);
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->image = $request->image;
+        $user->designation = $request->designation;
+        $user->phone = $request->phone;
+        $user->status = $request->status;
+        $user->emp_id = $request->emp_id;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+        return response()->json(['success' => true, 'message' => "Employee Updated Successfully"]);
     }
-
-    $user->name = $request->name;
-    $user->email = $request->email;
-    $user->image = $request->image;
-    $user->designation = $request->designation;
-    $user->phone = $request->phone;
-    $user->status = $request->status;
-    $user->emp_id = $request->emp_id;
-
-    // **Preserve existing password if not provided**
-    if ($request->filled('password')) {
-        $user->password = Hash::make($request->password);
-    }
-
-    $user->save();
-
-    return response()->json(['success' => true, 'message' => "Employee Updated Successfully"]);
-}
-
 
     public function  destroy($id)
     {
@@ -151,7 +142,7 @@ class UserController extends Controller
     $month = request('month', date('m'));
     $year = request('year', date('Y'));
     $statusFilter = $request->query('status'); // Store status filter separately
-
+    $user = User::where('id',$id)->first();
     // Fetch attendance records
     $attendanceRecords = Attendance::where('user_id', $id)
         ->whereMonth('date', $month)
@@ -175,7 +166,24 @@ class UserController extends Controller
 
         if (isset($attendanceRecords[$formattedDate])) {
             $record = $attendanceRecords[$formattedDate];
-            $recordStatus = $record->status; // Use a separate variable
+
+            $checkInTime = !empty($record->check_in_time) ? strtotime($record->check_in_time) : null;
+            $checkOutTime = !empty($record->check_out_time) ? strtotime($record->check_out_time) : null;
+
+            if (is_null($checkInTime) || is_null($checkOutTime)) {
+                $recordStatus = 'Absent'; // No check-in or check-out means Absent
+            } else {
+                // Calculate worked hours
+                $workedHours = ($checkOutTime - $checkInTime) / 3600; // Convert to hours
+
+                if ($workedHours < 4.5) {
+                    $recordStatus = 'Absent';
+                } elseif ($workedHours >= 4.5 && $workedHours < 9) {
+                    $recordStatus = 'Half-day';
+                } else {
+                    $recordStatus = 'Present';
+                }
+            }
 
             $allDays[] = [
                 'date' => $formattedDate,
@@ -215,7 +223,7 @@ class UserController extends Controller
     }
 
     // Paginate the data
-    $perPage = 10;
+    $perPage = 15;
     $currentPage = request()->get('page', 1);
     $allDaysPaginated = new LengthAwarePaginator(
         collect($allDays)->slice(($currentPage - 1) * $perPage, $perPage)->values(),
@@ -235,7 +243,7 @@ class UserController extends Controller
     });
 
     $totalHalfDay = collect($allDays)->where('status', 'Half-day')->count();
-    $totalAbsent = collect($allDays)->where('status', 'Absent')->count();
+    $totalAbsent = $totalWorkingDays - $totalPresent;
 
     return view("pages.users.attendance", compact(
         "allDaysPaginated",
@@ -243,9 +251,11 @@ class UserController extends Controller
         "totalPresent",
         "totalHalfDay",
         "totalAbsent",
-        "title"
+        "title",
+        'user',
     ));
 }
+
 
 
     public function attendance()
@@ -330,14 +340,89 @@ class UserController extends Controller
         return view("users.holidays", compact('holidays'));
     }
     public function dashboard()
-    {
-        $currentYear = Carbon::now()->year;
+{
+    $currentYear = Carbon::now()->year;
+    $currentMonth = Carbon::now()->month;
+    $userId = auth()->id(); // Get logged-in user ID
 
-        // Count holidays for the current year
-        $holidaysCount = Holiday::whereYear('date', $currentYear)->count();
+    // Fetch all holidays for the current month
+    $holidays = Holiday::whereYear('date', $currentYear)
+        ->whereMonth('date', $currentMonth)
+        ->pluck('date')
+        ->toArray();
 
-        return view("users.dashboard", compact('holidaysCount'));
+    $holidaysCount = Holiday::whereYear('date', $currentYear)
+                    ->count();
+
+    // Get attendance records for the user
+    $attendances = Attendance::where('user_id', $userId)
+        ->whereYear('date', $currentYear)
+        ->whereMonth('date', $currentMonth)
+        ->get()
+        ->keyBy('date'); // Convert to an associative array for easy lookup
+
+    $totalPresentDays = 0;
+    $totalAbsentDays = 0;
+    $totalWorkingDays = 0;
+
+    // Debugging arrays
+    $workingDays = [];
+    $absentDays = [];
+
+    // Loop through each day up to today’s date
+    for ($day = 1; $day <= Carbon::now()->day; $day++) {
+        $date = Carbon::createFromDate($currentYear, $currentMonth, $day)->format('Y-m-d');
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek; // 6 = Saturday, 0 = Sunday
+
+        // Ignore weekends and holidays
+        if (!in_array($date, $holidays) && $dayOfWeek != 6 && $dayOfWeek != 0) {
+            $totalWorkingDays++; // Count as a working day
+            $workingDays[] = $date; // Store working days for debugging
+
+            if (isset($attendances[$date])) {
+                $attendance = $attendances[$date];
+
+                $checkInTime = !empty($attendance->check_in_time) ? strtotime($attendance->check_in_time) : null;
+                $checkOutTime = !empty($attendance->check_out_time) ? strtotime($attendance->check_out_time) : null;
+
+                if (is_null($checkInTime) || is_null($checkOutTime)) {
+                    // No check-in or check-out recorded -> Full Absent
+                    $totalAbsentDays++;
+                    $absentDays[] = $date;
+                } else {
+                    // Calculate worked hours
+                    $workedHours = ($checkOutTime - $checkInTime) / 3600; // Convert seconds to hours
+
+                    if ($workedHours < 4.5) {
+                        $totalAbsentDays++; // Less than 4.5 hours -> Full Absent
+                        $absentDays[] = $date;
+                    } elseif ($workedHours >= 4.5 && $workedHours < 9) {
+                        $totalPresentDays += 0.5;
+                        $totalAbsentDays += 0.5; // Half-day: count both present & absent
+                        $absentDays[] = $date . " (Half-Day)";
+                    } else {
+                        $totalPresentDays++; // Full-day Present
+                    }
+                }
+            } else {
+                // No attendance record on a working day -> Full Absent
+                $totalAbsentDays++;
+                $absentDays[] = $date;
+            }
+        }
     }
+
+
+    return view("users.dashboard", compact('totalWorkingDays', 'totalPresentDays', 'totalAbsentDays', 'holidaysCount'));
+}
+
+
+
+
+
+    
+
+
 
     public function logout(Request $request)
     {
@@ -353,8 +438,7 @@ class UserController extends Controller
 
     public function directory(Request $request)
     {
-        $user = Auth::user();
-        return view("users.directory",compact('user'));
+        return view("users.directory");
     }
 
     public function import(Request $request)
@@ -366,5 +450,19 @@ class UserController extends Controller
         Excel::import(new UsersImport, $request->file('file'));
 
         return redirect()->back()->with('success', 'Users imported successfully.');
+    }
+
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'new_password' => 'required|min:6|confirmed'
+        ]);
+
+        $user = auth()->user();
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password updated successfully!']);
     }
 }

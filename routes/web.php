@@ -74,6 +74,7 @@ Route::prefix('user')->as("user.")->group(function () {
         Route::get("emp-directory", [UserController::class, 'directory'])->name("directory");
         Route::get("all-emp-directory", [AjaxController::class, 'Employeedirectory'])->name("employee.directory");
 
+        Route::post('/change-password', [UserController::class, 'changePassword'])->name('change.password');
         Route::get("logout", [UserController::class, 'logout'])->name("logout");
 
     });

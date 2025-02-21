@@ -36,11 +36,11 @@
                 <a href="index.html">
                     <div class="iq-light-logo">
                         <div class="iq-light-logo">
-                            <img src="{{ asset('hrmodule.png') }}" height="200" class="" alt="" />
+                            <img src="{{ asset('https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg') }}" height="80px" class="" alt="" />
                         </div>
                     </div>
                 </a>
-                <div class="iq-menu-bt-sidebar">
+               <!--  <div class="iq-menu-bt-sidebar">
                     <div class="iq-menu-bt align-self-center">
                         <div class="wrapper-menu">
                             <div class="main-circle">
@@ -51,7 +51,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
             <div id="sidebar-scrollbar">
                 <nav class="iq-sidebar-menu">
@@ -66,13 +66,14 @@
                       
                         <li @if (Route::is('admin.users.index')) class="active" @endif>
                             <a href="{{ route('admin.users.index') }}" class="iq-waves-effect">
-                                <i class="ri-user-settings-line"></i><span>Employee Management</span></a>
+                                <i class="ri-user-settings-line"></i><span>Employees Management</span></a>
                         </li>
 
                         <li @if (Route::is('admin.holidayss.index')) class="active" @endif>
                             <a href="{{ route('admin.holidayss.index') }}" class="iq-waves-effect">
                             <i class="ri-calendar-event-line"></i><span>Holidays</span></a>
                         </li>
+
 
                         <li>
                             <a href="#" class="iq-waves-effect" onclick="askLogout()">
@@ -121,11 +122,11 @@
                     <ul class="navbar-list">
                         <li>
                             <a href="#"
-                                class="search-toggle iq-waves-effect d-flex align-items-center bg-primary rounded">
+                                class="search-toggle iq-waves-effect d-flex align-items-center ">
                                 <img src="{{ asset('assets/images/user/image.png') }}" class="img-fluid rounded mr-3"
                                     alt="user">
                                 <div class="caption">
-                                    <h6 class="mb-0 line-height text-white">{{ auth()->user()->name }}</h6>
+                                    <h6 class="mb-0 line-height text-dark">{{ auth()->user()->name }}</h6>
                                     <!-- <span class="font-size-12 text-white">Available</span> -->
                                 </div>
                             </a>

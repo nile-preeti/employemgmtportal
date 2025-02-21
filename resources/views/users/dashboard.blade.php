@@ -64,7 +64,32 @@
 
             .date-time-sec h2 {color: #000 !important;}
 
+            .swal2-confirm{
+                background-color: #ffffff !important;
+                border: 1px solid #064086 !important;
+                color: #064086 !important;
+                padding: 9px 30px;
+                border-radius: 50px;
+            } 
+
+            .swal2-confirm:hover{background: #fff !important;}
+
+            .swal2-cancel {    padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 50px;
+                background-color: #064086 !important;
+                color: white;
+                font-weight: 500;
+                display: inline-block;
+            }
            
+            div#swal2-html-container {
+                color: #000;
+                font-weight: 500;
+            }
+
+            .swal2-popup.swal2-modal.swal2-show{padding: 40px;}
            
 
         </style>
@@ -111,11 +136,11 @@
 
 
         <div>
-            <div class="container-fluid">
+            <div class="container">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="text-dark mb-4 mt-4 pb-0"> Welcome {{ auth()->user()->name }}</h2>
+                            <h2 class="text-dark mb-5 mt-5 pb-0"> Welcome {{ auth()->user()->name }}</h2>
                             <!-- <a href="#" class="btn btn-primary" onclick="logout()">Logout</a> -->
                         </div>
                     </div>
@@ -326,7 +351,7 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-6 col-md-6 col-lg-4 mb-3">
+                    <div class="col-sm-6 col-md-6 col-lg-4 mb-3 d-none">
                         <div class="mark-attendance-sec">
                         <a href="{{ route('user.holidays')}}">
                             <div class="bg-gradient-success card card-img-holder">
@@ -384,7 +409,7 @@
                                     <div class="col-8">
                                       <div class="numbers">
                                         <p class="text-light text-sm text-uppercase fw-medium">View Attendance</p>
-                                        <h3 class="text-light font-weight-bolder pb-0"> &nbsp; </h3>
+                                        <h6 class="text-light font-weight-bolder pb-0">P - {{$totalPresentDays}} | A - {{$totalAbsentDays}}</h6>
                                       </div>
                                     </div>
                                     <div class="col-4 text-end align-items-center d-flex justify-content-end">
@@ -408,7 +433,7 @@
                                   <div class="row">
                                     <div class="col-8">
                                       <div class="numbers">
-                                        <p class="text-light text-sm text-uppercase fw-medium">Directory</p>
+                                        <p class="text-light text-sm text-uppercase fw-medium">Employee Directory</p>
                                         <h3 class="text-light font-weight-bolder pb-0 "></h3>
                                       </div>
                                     </div>
@@ -469,7 +494,7 @@ Swal.fire({
     },
     type: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#3085d6',
+    confirmButtonColor: '#064086',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Yes'
 }).then((result) => {

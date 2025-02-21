@@ -20,7 +20,58 @@
                              <h4 class="card-title">User List</h4>
                           </div>
                        </div> -->
+
+                       <div class="iq-card-body mb-4">
+                            <div class="card mt-3 data-cards">
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <label>Name:</label>
+                                        <p><b>{{$user->name}}</b></p>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label>Employee Id:</label>
+                                        <p><b>{{$user->emp_id}}</b></p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Designation:</label>
+                                        <p><b>{{$user->designation}}</b></p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Email:</label>
+                                        <p><b>{{$user->email}}</b></p>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="iq-card-body row mb-4">
+                            <div class="col-md-3">
+                                <div class=" card mt-3 data-cards">
+                                    <div class="d-flex justify-content-end ">
+                                        <p><b>Total Working Days: {{ $totalWorkingDays }}</b></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card mt-3 data-cards">
+                                    <div class="d-flex justify-content-end ">
+                                        <p><b>Total Present: {{ $totalPresent }}</b></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card mt-3 data-cards">
+                                    <div class="d-flex justify-content-end ">
+                                        <p><b>Total Absent: {{ $totalAbsent }}</b></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     <div class="iq-card-body">
+                        
+
                         <div class="">
                             <div class="row justify-content-between">
                                 {{-- <div class="col-sm-12 col-md-6">
@@ -90,6 +141,10 @@
                                             src="{{ asset('reset.png') }}" height="20" alt=""></span>
                                 </div>
                             </div>
+
+                            
+
+                        
                             <table id="user-list-table" class="table table-striped table-borderless mt-4">
                                 <thead>
                                     <tr>
@@ -124,17 +179,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <div class="d-flex justify-content-end mt-3 data-cards">
-                                <p><b>Total Working Days: {{ $totalWorkingDays }}</b></p>
-                            </div>
-                            <div class="d-flex justify-content-end mt-3 data-cards">
-                                <p><b>Total Present: {{ $totalPresent }}</b></p>
-                            </div>
-                            <div class="d-flex justify-content-end mt-3 data-cards">
-                                <p><b>Total Absent: {{ $totalAbsent }}</b></p>
-                            </div>
-                        </div>
+                        
 
                         <div class="row justify-content-between mt-3">
                             <div id="user-list-page-info" class="col-md-6">

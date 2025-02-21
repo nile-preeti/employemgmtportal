@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Response;
 use App\Models\Holiday;
+use Illuminate\Support\Facades\Response;
 
 class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $users = User::where("role_id", 2)->orderBy('id','DESC')->get();
+        $users = User::where("role_id", 2)->orderBy('emp_id','DESC')->get();
         $totalHolidays = Holiday::whereYear('date', Carbon::now()->year)->count();
        
         
@@ -64,9 +64,10 @@ class AdminController extends Controller
         // Return CSV file as a response
         return Response::make($csvOutput, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="user_logs.csv"',
+            'Content-Disposition' => 'attachment; filename="employee_logs.csv"',
         ]);
     }
+    
     public function signin()
     {
         return view("pages.signin");

@@ -23,7 +23,7 @@
                         <div class="iq-card-body">
                             <div class="d-flex d-flex align-items-center justify-content-between">
                                 <div>
-                                    <h6 class="text-dark font-weight-normal">Total Employee</h6>
+                                    <h6 class="text-dark font-weight-normal">Total Employees</h6>
                                     <h2 class="text-dark font-weight-bold">{{ count($users) }}</h2>
                                 </div>
                                 <div class="rounded-circle iq-card-icon dark-icon-light iq-bg-primary "><i
@@ -60,7 +60,7 @@
                     <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
                         <div class="iq-card-header d-flex justify-content-between">
                             <div class="iq-header-title">
-                                <h4 class="card-title">Employee List</h4>
+                                <h4 class="card-title">Employees List</h4>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <form class="position-relative mr-5">
@@ -126,7 +126,7 @@
 
                                                 <td>{{$item->phone ?? 'N/A'}}</td>
                                                 <td><span
-                                                        class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
+                                                        class="badge dark-icon-light iq-bg-success">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                                 </td>
 
                                             </tr>

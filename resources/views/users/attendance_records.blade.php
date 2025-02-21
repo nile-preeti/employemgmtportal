@@ -46,15 +46,15 @@
         }
 
         #pagination-controls button {
-            background-color: #007bff;
+            background-color: #064086;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
+            padding: 6px 20px;
+            font-size: 14px;
+            border-radius: 50px;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.3s ease;
-            margin: 0 10px;
+            margin: 0px;
         }
 
         #pagination-controls button:hover {
@@ -68,9 +68,9 @@
         }
 
         #page-info {
-            font-size: 16px;
+            font-size: 14px;
             margin: 0 20px;
-            color: #333;
+            color: #000;
         }
 
         .header {
@@ -90,6 +90,80 @@
         .profile-image {
             border: 2px solid #4183d1;
         }
+
+        span.badge.badge-info {
+            background: #ffd12a;
+            color: #000;
+            font-weight: 500;
+            padding: 8px 14px;
+            margin-left: 20px;
+        }
+
+        span.badge.badge-warning {
+            background: #ffd12a;
+            color: #000;
+            font-weight: 500;
+            padding: 8px 14px;
+            margin-left: 20px;
+        }
+
+        span.badge.badge-danger {
+            background: #ff9448;
+            color: #000;
+            font-weight: 500;
+            padding: 8px 14px;
+            margin-left: 20px;
+        }
+
+        span.badge.badge-success {
+            background: #5bd846;
+            color: #000;
+            font-weight: 500;
+            padding: 8px 14px;
+            margin-left: 20px;
+        }
+
+
+
+        #recordsList li:first-child{margin-top: 0px !important;}
+        .swal2-confirm{
+                background-color: #ffffff !important;
+                border: 1px solid #064086 !important;
+                color: #064086 !important;
+                padding: 9px 30px;
+                border-radius: 50px;
+            } 
+
+            .swal2-confirm:hover{background: #fff !important;}
+
+            .swal2-cancel {    padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 50px;
+                background-color: #064086 !important;
+                color: white;
+                font-weight: 500;
+                display: inline-block;
+            }
+           
+            div#swal2-html-container {
+                color: #000;
+                font-weight: 500;
+            }
+
+            .swal2-popup.swal2-modal.swal2-show{padding: 40px;}
+            .btn.btn-search{background: #064086; padding: 12px 20px; font-size: 14px; color: #fff; border-radius: 50px;}
+
+            .form-control{
+                height: 45px;
+                background: #fff;
+                border: 1px solid var(--bs-border-color);
+                font-size: 14px;
+                color: var(--iq-body-text);
+                border-radius: 8px;
+            }
+
+
     </style>
 </head>
 
@@ -99,9 +173,6 @@
             <div class="d-flex flex-wrap align-items-center justify-content-between">
 
                 <a href="#"> <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="logo card-img-absolute" alt="circle-image" height="50px"></a>
-
-
-
 
                 <div class="dropdown text-end">
                     <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -125,42 +196,41 @@
                 <div class="col-md-12">
                     <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()"><img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"> </a>Attendance Record</h2>
                 </div>
-                <div class="row">
-        <!-- Month & Year Filter -->
-        <div class="col-md-4">
-            <label for="month">Select Month:</label>
-            <select id="month" class="form-control">
-                <option value="01">January</option>
-                <option value="02">February</option>
-                <option value="03">March</option>
-                <option value="04">April</option>
-                <option value="05">May</option>
-                <option value="06">June</option>
-                <option value="07">July</option>
-                <option value="08">August</option>
-                <option value="09">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
-            </select>
-        </div>
+                <div class="row mb-4">
+                    <!-- Month & Year Filter -->
+                    <div class="col-md-4">
+                        <label for="month">Select Month:</label>
+                        <select id="month" class="form-control">
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
 
-        <div class="col-md-4">
-    <label for="year">Select Year:</label>
-    <input type="number" id="year" class="form-control" min="2000" max="2050">
-</div>
+                    <div class="col-md-4">
+                        <label for="year">Select Year:</label>
+                        <input type="number" id="year" class="form-control" min="2000" max="2050">
+                    </div>
 
-        <div class="col-md-4">
-            <button class="btn btn-primary mt-4" onclick="fetchAttendance(1)">Filter</button>
-        </div>
-    </div>
-
-                <div class="row">
-                    <ol id="recordsList" style="padding-left: 50px;list-style: none;">
+                    <div class="col-md-4">
+                        <button class="btn btn-search mt-4" onclick="fetchAttendance(1)">Search</button>
+                    </div>
+                </div>
+                <div class="">
+                    <div id="recordsList" style="list-style: none;">
                         <!-- Dynamic content will be added here by the JavaScript -->
-                    </ol>
+                    </div>
 
-                    <div id="pagination-controls" class="d-flex justify-content-end">
+                    <div id="pagination-controls" class="d-flex justify-content-end mb-4">
                         <button id="prev-page" onclick="changePage('prev')" disabled>Previous</button>
                         <span id="page-info"></span>
                         <button id="next-page" onclick="changePage('next')">Next</button>
@@ -256,38 +326,39 @@ function displayRecords(records) {
         listItem.classList.add("mt-4");
 
         const formatTime = (time) => {
-            if (!time || time === "N/A") return "N/A"; // Handle missing values properly
-            return new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
+            return time && time !== "N/A" ? new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit'
-            });
+            }) : "N/A";
         };
 
         const formatAddress = (address) => address || "N/A";
 
         // Determine Status for Display
-        let statusLabel = "Present"; // Default Status
-        let bgColor = "badge-success"; // Default Green for Present
+        let statusLabel = "Present"; 
+let bgColor = "badge-success"; 
 
-        if (record.status === "Absent") {
-            statusLabel = "Absent";
-            bgColor = "badge-danger"; // Red for Absent
-        } else if (record.status === "Holiday") {
-            statusLabel = "Holiday";
-            bgColor = "badge-warning"; // Yellow for Holiday
-        } else if (record.status === "Weekly Off") {
-            statusLabel = "Weekly Off";
-            bgColor = "badge-info"; // Blue for Weekly Off
-        } else if (record.status === "N/A") {  
-            statusLabel = "N/A";
-            bgColor = "badge-secondary"; // Grey for N/A
-        }
+if (record.status.key === "absent") {
+    statusLabel = "Absent";
+    bgColor = "badge-danger"; 
+} else if (record.status.key === "holiday") {
+    statusLabel = "Holiday";
+    bgColor = "badge-warning"; 
+} else if (record.status.key === "weekly_off") {
+    statusLabel = "Weekly Off";
+    bgColor = "badge-info"; 
+} else if (record.status.key === "na") {  
+    statusLabel = "N/A";
+    bgColor = "badge-secondary"; 
+} else if (record.status.key === "half_day") {  
+    statusLabel = "Half Day";
+    bgColor = "badge-warning"; 
+} else if (record.status.key === "present") {  
+    statusLabel = "Present";
+    bgColor = "badge-success"; 
+}
 
-        // If status is an object, it means the user has attendance (check-in/check-out times)
-        if (typeof record.status === "object") {
-            statusLabel = "Present";
-            bgColor = "badge-success"; // Default for present
-        }
+
 
         listItem.innerHTML = `
         <div class="col-md-12">
@@ -375,6 +446,7 @@ function fetchRecords(page = 1) {
 
 // Check if user is logged in and fetch records
 var user = @json($user);
+console.log(user);
 if (user) {
     fetchRecords(); // Fetch records for the first page
     $("#name").text(user.name); // Display user name
@@ -507,6 +579,7 @@ Swal.fire({
         document.getElementById("year").value = currentYear;
     });
 </script>
+
 </body>
 
 </html>

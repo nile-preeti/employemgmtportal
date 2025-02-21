@@ -90,6 +90,42 @@
         .profile-image {
             border: 2px solid #4183d1;
         }
+
+        #recordsList li:first-child {
+            margin-top: 0px !important;
+        }
+
+        .swal2-confirm {
+            background-color: #ffffff !important;
+            border: 1px solid #064086 !important;
+            color: #064086 !important;
+            padding: 9px 30px;
+            border-radius: 50px;
+        }
+
+        .swal2-confirm:hover {
+            background: #fff !important;
+        }
+
+        .swal2-cancel {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 50px;
+            background-color: #064086 !important;
+            color: white;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        div#swal2-html-container {
+            color: #000;
+            font-weight: 500;
+        }
+
+        .swal2-popup.swal2-modal.swal2-show {
+            padding: 40px;
+        }
     </style>
 </head>
 
@@ -125,10 +161,18 @@
                 <div class="col-md-12">
                     <h2 class="py-4 text-dark mb-2 mt-2"><a href="javascript:history.back()"><img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"> </a>Employee Directory</h2>
                 </div>
-                <div class="row">
-                    <ol id="recordsList" style="padding-left: 50px;list-style: none;">
+                <div class="col-md-6 mb-2">
+                    <form class="mr-3 position-relative">
+                        <div class="form-group mb-0">
+                            <input type="search" class="form-control" name="search"
+                                placeholder="Search by  name..." aria-controls="user-list-table" value="">
+                        </div>
+                    </form>
+                </div>
+                <div class="">
+                    <div id="recordsList" style=";list-style: none;">
                         <!-- Dynamic content will be added here by the JavaScript -->
-                    </ol>
+                    </div>
 
                     <div id="pagination-controls" class="d-flex justify-content-end">
                         <button id="prev-page" onclick="changePage('prev')" disabled>Previous</button>
@@ -145,38 +189,46 @@
     </div>
     <script>
         let currentPage = 1;
-let lastPage = 1;
+        let lastPage = 1;
+        let searchQuery = ''; // Store the search query
 
-// Function to display employee directory
-function displayEmployees(employees) {
-    const recordsList = document.querySelector("#recordsList");
-    recordsList.innerHTML = ""; // Clear previous records
+        // Function to display employee directory
+        function displayEmployees(employees) {
+            const recordsList = document.querySelector("#recordsList");
+            recordsList.innerHTML = ""; // Clear previous records
 
-    employees.forEach((employee) => {
-        const listItem = document.createElement("li");
-        listItem.classList.add("mt-4");
+            if (employees.length === 0) {
+                // Show "No Records Found" when there is no data
+                recordsList.innerHTML = `
+            <li class="text-center mt-4">
+                <h5 class="text-danger">No Records Found</h5>
+            </li>`;
+                return;
+            }
 
-        listItem.innerHTML = `
+            employees.forEach((employee) => {
+                const listItem = document.createElement("li");
+                listItem.classList.add("mt-4");
+
+                listItem.innerHTML = `
         <div class="col-md-12">
             <div class="card">
                 <div class="d-flex justify-content-between date-time-sec">
-                    <h6>
-                        Name: ${employee.name} 
-                    </h6>
+                    <h6>Name: ${employee.name}</h6>
                 </div>
                 <div class="card-body py-2 px-2">
                     <div class="attendance-record-data">
                         <div class="d-md-flex justify-content-md-between">
                             <div>
-                                <h6>Employee ID: <span>${employee.emp_id} </span></h6>
-                                <h6> Email:  <span>${employee.email}</span></h6>
+                                <h6>Employee ID: <span>${employee.emp_id}</span></h6>
+                                <h6>Email: <span>${employee.email}</span></h6>
                             </div>
                             <div>
                                 <div class="d-md-flex justify-content-md-end">
-                                    <h6> Designation: <span>${employee.designation || 'N/A'}</span></h6>
+                                    <h6>Designation: <span>${employee.designation || 'N/A'}</span></h6>
                                 </div>
                                 <div class="d-md-flex justify-content-md-end">
-                                    <h6> Phone: <span>${employee.phone || 'N/A'}</span></h6>
+                                    <h6>Phone: <span>${employee.phone || 'N/A'}</span></h6>
                                 </div>
                             </div>
                         </div>
@@ -185,102 +237,68 @@ function displayEmployees(employees) {
             </div>
         </div>`;
 
-        recordsList.appendChild(listItem);
-    });
-}
-
-// Function to update pagination controls
-function updatePaginationControls() {
-    const paginationControls = document.getElementById("pagination-controls");
-    const pageInfo = document.getElementById("page-info");
-    const prevButton = document.getElementById("prev-page");
-    const nextButton = document.getElementById("next-page");
-
-    pageInfo.textContent = `Page ${currentPage} of ${lastPage}`;
-
-    prevButton.disabled = currentPage <= 1;
-    nextButton.disabled = currentPage >= lastPage;
-
-    if (lastPage <= 1) {
-        paginationControls.style.cssText = "display: none !important;"; // Force hide
-    } else {
-        paginationControls.style.cssText = "display: flex !important;"; // Force show
-    }
-}
-
-
-// Function to change the page
-function changePage(direction) {
-    if (direction === 'prev' && currentPage > 1) {
-        currentPage--;
-    } else if (direction === 'next' && currentPage < lastPage) {
-        currentPage++;
-    }
-
-    fetchEmployees(currentPage);
-}
-
-// Function to fetch employees
-function fetchEmployees(page = 1) {
-    $.get("{{ route('user.employee.directory') }}", { page: page }, function(data) {
-        if (data.success) {
-            displayEmployees(data.employees);
-            currentPage = data.current_page;
-            lastPage = data.last_page;
-            updatePaginationControls();
+                recordsList.appendChild(listItem);
+            });
         }
-    });
-}
 
-// Load employees when the page is ready
-document.addEventListener("DOMContentLoaded", function () {
-    fetchEmployees();
-});
+        // Function to update pagination controls
+        function updatePaginationControls() {
+            const paginationControls = document.getElementById("pagination-controls");
+            const pageInfo = document.getElementById("page-info");
+            const prevButton = document.getElementById("prev-page");
+            const nextButton = document.getElementById("next-page");
 
-    </script>
+            pageInfo.textContent = `Page ${currentPage} of ${lastPage}`;
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            populateMonthFilter();
-            fetchAttendance(); // Load attendance data initially
-        });
+            prevButton.disabled = currentPage <= 1;
+            nextButton.disabled = currentPage >= lastPage;
 
-        function populateMonthFilter() {
-            const monthFilter = document.getElementById("monthFilter");
-            const currentDate = new Date();
-            const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
-            const currentYear = currentDate.getFullYear();
-
-            for (let i = 0; i < 12; i++) {
-                const date = new Date(currentYear, currentMonth - 1 - i, 1);
-                const monthValue = date.toISOString().slice(0, 7); // Format YYYY-MM
-                const monthText = date.toLocaleString('default', {
-                    month: 'long',
-                    year: 'numeric'
-                });
-
-                const option = new Option(monthText, monthValue);
-                if (monthValue === `${currentYear}-${String(currentMonth).padStart(2, '0')}`) {
-                    option.selected = true;
-                }
-                monthFilter.appendChild(option);
+            if (lastPage <= 1) {
+                paginationControls.style.cssText = "display: none !important;"; // Force hide
+            } else {
+                paginationControls.style.cssText = "display: flex !important;"; // Force show
             }
         }
 
-        function fetchAttendance(page = 1) {
-            const userId = 1; // Replace with dynamic user ID
-            const selectedMonth = document.getElementById("monthFilter").value;
+        // Function to change the page
+        function changePage(direction) {
+            if (direction === 'prev' && currentPage > 1) {
+                currentPage--;
+            } else if (direction === 'next' && currentPage < lastPage) {
+                currentPage++;
+            }
 
-            fetch(`/fetch-attendance?id=${userId}&month=${selectedMonth}&page=${page}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        displayRecords(data.records);
-                        updatePagination(data.current_page, data.last_page);
-                    }
-                })
-                .catch(error => console.error("Error fetching attendance:", error));
+            fetchEmployees(currentPage, searchQuery);
         }
+
+        // Function to fetch employees with search
+        function fetchEmployees(page = 1, search = '') {
+            $.get("{{ route('user.employee.directory') }}", {
+                page: page,
+                search: search
+            }, function(data) {
+                if (data.success) {
+                    displayEmployees(data.employees);
+                    currentPage = data.current_page;
+                    lastPage = data.last_page;
+                    updatePaginationControls();
+                    document.querySelector("input[name='search']").value = search; // Retain search query
+                }
+            });
+        }
+
+        // Search input event listener
+        document.querySelector("input[name='search']").addEventListener("input", function() {
+            searchQuery = this.value;
+            fetchEmployees(1, searchQuery);
+        });
+
+        // Load employees when the page is ready
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.querySelector("input[name='search']");
+            searchQuery = searchInput.value; // Get existing search query if any
+            fetchEmployees(1, searchQuery);
+        });
     </script>
     <script>
         function logout() {

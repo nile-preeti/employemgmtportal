@@ -25,15 +25,13 @@
                                         </div>
                                     </div>
                                     <div class="col-md-1">
-                                        <span style="cursor:pointer;padding-top:10px"
-                                            onclick="window.location.href = window.location.origin + window.location.pathname;"><img
-                                                src="{{ asset('reset.png') }}" height="20" alt=""></span>
+                                        <div class="btn-reload" style="cursor:pointer;padding-top:10px" onclick="window.location.href = window.location.origin + window.location.pathname;"><img src="{{ asset('reset.png') }}" height="20" alt="">
+                                        </div>
                                     </div>
                                     <div class="col-sm-12 col-md-5">
                                         <div class="user-list-files d-flex">
 
-                                            <a class="iq-bg-primary"
-                                                onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
+                                            <a class="btn btn-primary iq-bg-primary text-light rounded-pill " onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
                                                 data-toggle="modal" data-target=".CreateModel" href="#">Add Holiday</a>
                                         </div>
                                     </div>

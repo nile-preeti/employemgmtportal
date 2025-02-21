@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
    <head>
       <!-- Required meta tags -->
@@ -33,34 +33,34 @@
             <div class="container-fluid bg-white p-0">
                 <div class="row no-gutters">
                     
-                    <div class="col-sm-5 text-center">
-                        <div class="sign-in-detail text-white">
-                            <img src="{{ asset('hrmodule.png') }}" class="img-fluid" class="" alt="" />
+                    <div class="col-sm-12 col-lg-6 col-md-6 text-center">
+                        <div class="sign-in-detail text-white align-items-center d-flex justify-content-center">
+                            <img src="{{ asset('https://nileprojects.in/hrmodule/public/assets/images/login-logo.png') }}" class="w-50" class="" alt="" />
                         </div>
                     </div>
-                    <div class="col-sm-6 align-self-center">
+                    <div class="col-sm-12 col-lg-6 col-md-6 align-self-center">
                         <div class="sign-in-from">
-                           
-                            <h1 class="mb-0 dark-signin">Employee Login</h1>
-                            <p>Enter your Emp Id and password to access user panel.</p>
-                            <form class="mt-4" id="signin_form" enctype="multipart/form-data" action="{{route('user.login_post')}}" method="POST">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="exampleInputEmail1">Emp Id</label>
-                                    <input type="text" name="emp_id" class="form-control mb-0" id="exampleInputEmail1" placeholder="Enter emp id">
-                                </div>
-                                <div class="form-group">
-                                    <label for="exampleInputPassword1">Enter Your Password</label>
-                                    <input type="password"  name="password" class="form-control mb-0" id="exampleInputPassword1" placeholder="Password">
-                                </div>
-                                <div class="d-inline-block w-100">
-                                    <button type="submit" class="btn btn-primary float-left">Sign in</button>
-                                    {{-- <a href="#" class="float-right">Forgot password?</a> --}}
-                                </div>
-                                {{-- <div class="sign-info">
-                                    <span class="dark-color d-inline-block line-height-2">Don't have an account? <a href="sign-up.html">Sign up</a></span>
-                                </div> --}}
-                            </form>
+                           <div class="w-100">
+                                <h1 class="mb-0 dark-signin">Employee Login</h1>
+                                <form class="mt-4" id="signin_form" enctype="multipart/form-data" action="{{route('user.login_post')}}" method="POST">
+                                    @csrf
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Employee Id *</label>
+                                        <input type="text" name="emp_id" class="form-control mb-0" id="exampleInputEmail1" placeholder="Employee Id">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputPassword1">Password *</label>
+                                        <input type="password"  name="password" class="form-control mb-0" id="exampleInputPassword1" placeholder="Password">
+                                    </div>
+                                    <div class="d-inline-block w-100">
+                                        <button type="submit" class="btn btn-signin float-left">Sign in</button>
+                                        {{-- <a href="#" class="float-right">Forgot password?</a> --}}
+                                    </div>
+                                    {{-- <div class="sign-info">
+                                        <span class="dark-color d-inline-block line-height-2">Don't have an account? <a href="sign-up.html">Sign up</a></span>
+                                    </div> --}}
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -111,6 +111,17 @@
                         maxlength: 191,
 
                     },
+                },
+                messages: {
+                    emp_id: {
+                        required: "Required",
+                        maxlength: "Max 4 digits allowed.",
+                        digits: "Only numbers allowed."
+                    },
+                    password: {
+                        required: "Required",
+                        maxlength: "Max 191 characters allowed."
+                    }
                 },
                 errorElement: "span",
                 errorPlacement: function(error, element) {

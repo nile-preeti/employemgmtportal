@@ -37,6 +37,32 @@
             font-size: 13px;
             margin-top: 5px;
         }
+        .swal2-confirm{
+                background-color: #ffffff !important;
+                border: 1px solid #064086 !important;
+                color: #064086 !important;
+                padding: 9px 30px;
+                border-radius: 50px;
+            } 
+
+            .swal2-confirm:hover{background: #fff !important;}
+
+            .swal2-cancel {    padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 50px;
+                background-color: #064086 !important;
+                color: white;
+                font-weight: 500;
+                display: inline-block;
+            }
+           
+            div#swal2-html-container {
+                color: #000;
+                font-weight: 500;
+            }
+
+            .swal2-popup.swal2-modal.swal2-show{padding: 40px;}
     </style>
 </head>
 
@@ -137,7 +163,7 @@
                 </div>
                 <div class="row">
                     @foreach ($holidays as $key => $item)
-                    <div class="col-md-12 mb-3">
+                    <div class="col-md-12 col-lg-6 col-sm-12 mb-3">
                         <div class="card">
                             <div class="p-2 d-flex justify-content-between date-time-sec">
                                 <h6>{{ $key }}</h6>
