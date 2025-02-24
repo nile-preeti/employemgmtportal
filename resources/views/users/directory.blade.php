@@ -228,7 +228,10 @@
                                     <h6>Designation: <span>${employee.designation || 'N/A'}</span></h6>
                                 </div>
                                 <div class="d-md-flex justify-content-md-end">
-                                    <h6>Phone: <span>${employee.phone || 'N/A'}</span></h6>
+                                    <h6>Reporting Manager: <span>${employee.rep_manager || 'N/A'}</span></h6>
+                                </div>
+                                <div class="d-md-flex justify-content-md-end">
+                                     <h6>Phone: <span>${employee.phone ? `+91${employee.phone}` : 'N/A'}</span></h6>
                                 </div>
                             </div>
                         </div>

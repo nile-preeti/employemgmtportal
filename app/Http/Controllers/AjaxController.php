@@ -344,14 +344,15 @@ class AjaxController extends Controller
 
         $query = User::where('role_id', 2)
             ->where('status', 1)
-            ->select('id', 'name', 'email', 'emp_id', 'designation', 'phone');
+            ->select('id', 'name', 'email', 'emp_id', 'designation', 'phone','rep_manager')->orderBy('emp_id', 'desc');
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
                 ->orWhere('emp_id', 'LIKE', "%{$search}%")
                 ->orWhere('email', 'LIKE', "%{$search}%")
-                ->orWhere('designation', 'LIKE', "%{$search}%");
+                ->orWhere('designation', 'LIKE', "%{$search}%")
+                ->orWhere('phone', 'LIKE', "%{$search}%");
             });
         }
 

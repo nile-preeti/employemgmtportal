@@ -243,11 +243,10 @@
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
         function askLogout() {
-            var title = ' you want to logout ?';
+            var title = 'Are you sure, you want to logout ?';
             Swal.fire({
                 title: '',
                 text: title,
-                iconHtml: '<img src="{{ asset('assets/images/question.png') }}" height="25px">',
                 customClass: {
                     icon: 'no-border'
                 },

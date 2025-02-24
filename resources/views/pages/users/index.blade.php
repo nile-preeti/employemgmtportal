@@ -61,6 +61,7 @@
                                             <th> Name</th>
                                             <th>email</th>
                                             <th>Designation</th>
+                                            <th>Reporting Manager</th>
                                             <th>Phone No.</th>
                                             <th>Status</th>
                                             <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
@@ -76,7 +77,8 @@
 
                                                 <td>{{ $item->email }}</td>
                                                 <td>{{$item->designation ?? 'N/A'}}</td>
-                                                <td>{{$item->phone ?? 'N/A'}}</td>
+                                                <td>{{ !empty($item->rep_manager) ? $item->rep_manager : 'N/A' }}</td>
+                                                <td>{{ !empty($item->phone) ? '+91' . $item->phone : 'N/A' }}</td>
                                                 <td><span
                                                         class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                                 </td>
@@ -90,6 +92,7 @@
                                                             data-designation="{{$item->designation}}"
                                                             data-phone="{{$item->phone}}"
                                                               data-emp="{{$item->emp_id}}"
+                                                            data-manager="{{$item->rep_manager}}"
                                                             data-image="{{ $item->image ? asset("uploads/images/$item->image") : null }}"
                                                             data-url="{{ route('admin.users.update', $item->id) }}"
                                                             onclick="showData(this)" data-target="#EditModel"
@@ -223,6 +226,14 @@
                                 <input type="text" name="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
 
                             </div>
+
+
+                            <div class="form-group">
+                                <label for="name">Reporting Manager</label>
+                                <input type="text" name="rep_manager" class="form-control">
+
+                            </div>
+
                             <div class="form-group">
                                 <label for="name">Password*</label>
                                 <input type="text" name="password" class="form-control" required>
@@ -293,6 +304,13 @@
                                 <input type="text" name="phone" id="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
 
                             </div>
+
+                            <div class="form-group">
+                                <label for="name">Reporting Manager</label>
+                                <input type="text" name="rep_manager" id="rep_manager" class="form-control" >
+
+                            </div>
+
                             <div class="form-group">
                                 <div>
                                     <button type="button" class="btn btn-primary my-1" onclick="$('#password').toggle()">Reset
@@ -598,6 +616,7 @@
 
             $("#status").val(ele.getAttribute("data-status"));
             $("#name").val(ele.getAttribute("data-name"));
+            $("#rep_manager").val(ele.getAttribute("data-manager"));
             $("#price_per_mile").val(ele.getAttribute("data-price_per_mile"));
             initializeDropzone("editDropzone", "{{ route('image-upload') }}", ele.getAttribute("data-image"), true)
 

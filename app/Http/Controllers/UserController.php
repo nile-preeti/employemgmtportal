@@ -72,7 +72,8 @@ class UserController extends Controller
             'password' => 'required',
             'designation' => 'required',
             'phone' => 'required',
-            'emp_id' => 'required| unique:users,emp_id'
+            'emp_id' => 'required| unique:users,emp_id',
+            'rep_manager' => 'nullable',
 
 
         ]);
@@ -85,6 +86,7 @@ class UserController extends Controller
         $user->designation = $request->designation;
         $user->phone = $request->phone;
         $user->emp_id = $request->emp_id;
+        $user->rep_manager = $request->rep_manager;
 
         $user->status = $request->status;
 
@@ -118,6 +120,7 @@ class UserController extends Controller
         $user->phone = $request->phone;
         $user->status = $request->status;
         $user->emp_id = $request->emp_id;
+        $user->rep_manager = $request->rep_manager;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
@@ -280,6 +283,8 @@ class UserController extends Controller
         $request->validate([
             'password' => 'required',
             'emp_id' => 'required|exists:users,emp_id',
+        ],[
+            'emp_id.exists' => "Invalid Employee Id"
         ]);
 
         $credentials = $request->only('emp_id', 'password');

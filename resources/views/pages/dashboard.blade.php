@@ -105,6 +105,7 @@
                                             <th> Name</th>
                                             <th> Email</th>
                                             <th>Designation</th>
+                                            <th>Reporting Manager</th>
                                             <th>Phone No.</th>
                                             <th>Status</th>
                                         </tr>
@@ -123,8 +124,9 @@
                                                 <td>
                                                     {{ $item->designation ?? 'N/A' }}
                                                 </td>
+                                                <td>{{ !empty($item->rep_manager) ? $item->rep_manager : 'N/A' }}</td>
 
-                                                <td>{{$item->phone ?? 'N/A'}}</td>
+                                                <td>{{ !empty($item->phone) ? '+91' . $item->phone : 'N/A' }}</td>
                                                 <td><span
                                                         class="badge dark-icon-light iq-bg-success">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                                 </td>

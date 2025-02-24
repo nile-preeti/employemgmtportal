@@ -273,7 +273,7 @@
                 <div class="col-lg-4 col-md-6 col-sm-12 mt-4">
                   <div class="res-fields">
                     <label for="inputAddress" class="form-label">Phone Number</label>
-                    <p>{{ auth()->user()->phone }}</p>
+                    <p>{{ auth()->user()->phone ? '+91' . auth()->user()->phone : 'N/A' }}</p>
                   </div>
                 </div>
 
@@ -330,6 +330,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
+          <h4>Change Password</h4>
         </div>
         <div class="modal-body">
         <form id="changePasswordForm">
