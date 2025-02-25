@@ -122,5 +122,9 @@ return [
     */
 
     'password_timeout' => 10800,
+    'session' => [
+        'lifetime' => 43200, // 30 days in minutes
+        'expire_on_close' => false,
+    ],
 
 ];

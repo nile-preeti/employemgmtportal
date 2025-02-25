@@ -123,7 +123,9 @@ class UserController extends Controller
         $user->rep_manager = $request->rep_manager;
 
         if ($request->filled('password')) {
+            $newPassword = $request->password;
             $user->password = Hash::make($request->password);
+            //Mail::to($user->email)->send(new EmployeeCredentialsMail($user, $newPassword));
         }
 
         $user->save();
@@ -295,12 +297,12 @@ class UserController extends Controller
             // If it's a user (role_id != 1)
             if ($user->role_id != 1) {
                 // Attempt to log in as a regular user
-                if (Auth::guard('web')->attempt($credentials)) {
+                if (Auth::guard('web')->attempt($credentials,true)) {
                     return response()->json([
                         'status' => 'success',
                         'redirect' => route("user.dashboard"),
                         'message' => "User logged in successfully",
-                        'user' => $user
+                        'user' => Auth::user(),
                     ]);
                     
                 } else {
