@@ -115,6 +115,7 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
+                        <li><a class="dropdown-item" href="{{route('user.help')}}">Help</a></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
                     </ul>
                 </div>
@@ -386,12 +387,23 @@
             }
 
             // Fetch Address from Coordinates
-            async function getAddressFromCoordinates(lat, lng) {
+            async function getAddressFromCoordinates(lat, lng, defaultAddress = "Default Location") {
                 const response = await fetch(
-                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}`
+                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${MAPBOX_TOKEN}`
                 );
                 const data = await response.json();
-                return data.features[0]?.place_name || "Unknown address";
+              
+
+                if (!data.features.length) {
+                    return defaultAddress; // Return default if no results at all
+                }
+         
+                // Look for a rooftop-accurate address
+                const preciseAddress = data.features.find(feature => feature.properties?.accuracy ===
+                    "rooftop");
+                    const preciseStreetAddress = data.features.find(feature => feature.properties?.accuracy ===
+                    "street");
+                return preciseAddress ? preciseAddress.place_name : preciseStreetAddress.place_name;
             }
 
             // Display Records

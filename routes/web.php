@@ -56,6 +56,9 @@ Route::prefix('user')->as("user.")->group(function () {
         Route::get("dashboard", [UserController::class, 'dashboard'])->name("dashboard");
         Route::get("attendance", [UserController::class, 'attendance'])->name('attendance');
 
+        Route::get("help", [UserController::class, 'help'])->name('help');
+
+
         Route::post('/attendance/store', [AjaxController::class, 'storeAttendance'])->name('attendance.store');
 
         // Route for updating attendance (Check-out)
@@ -96,3 +99,8 @@ Route::get('/clear-cache', function () {
 
     return "Cache is cleared";
 });
+
+
+// Route::get('/help', function () {
+//     return view('users.help');
+// })->name('users.help');

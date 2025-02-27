@@ -334,6 +334,14 @@ class UserController extends Controller
         return view("users.attendance_records", compact('user'));
     }
 
+
+    public function help()
+    {
+        $user = Auth::user();
+
+        return view("users.help", compact('user'));
+    }
+
     public function holidays()
     {
 

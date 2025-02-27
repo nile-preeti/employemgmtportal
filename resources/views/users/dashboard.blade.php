@@ -5,6 +5,11 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Check-in/Check-out with Map</title>
+        <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="NileTech">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
         <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -126,7 +131,9 @@
               <ul class="dropdown-menu text-small" style="">
                 <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{route('user.help')}}">Help</a></li>
                 <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
+                
               </ul>
             </div>
           </div>
@@ -140,7 +147,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="text-dark mb-5 mt-5 pb-0"> Welcome {{ auth()->user()->name }}</h2>
+                            <h2 class="text-dark mb-5 mt-5 pb-0 text-capitalize"> Welcome {{ auth()->user()->name }}</h2>
                             <!-- <a href="#" class="btn btn-primary" onclick="logout()">Logout</a> -->
                         </div>
                     </div>

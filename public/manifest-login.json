@@ -1,0 +1,20 @@
+{
+  "name": "HR Module Login",
+  "short_name": "NileLogin",
+  "start_url": "https://nileprojects.in/hrmodule/login",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

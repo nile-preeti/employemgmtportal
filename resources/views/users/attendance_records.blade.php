@@ -184,6 +184,7 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
+                        <li><a class="dropdown-item" href="{{route('user.help')}}">Help</a></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
                     </ul>
                 </div>
@@ -348,7 +349,7 @@ if (record.status.key === "absent") {
     statusLabel = "Weekly Off";
     bgColor = "badge-info"; 
 } else if (record.status.key === "na") {  
-    statusLabel = "N/A";
+    statusLabel = " ";
     bgColor = "badge-secondary"; 
 } else if (record.status.key === "half_day") {  
     statusLabel = "Half Day";

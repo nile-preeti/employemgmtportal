@@ -232,6 +232,7 @@
             <li>
               <hr class="dropdown-divider">
             </li>
+            <li><a class="dropdown-item" href="{{route('user.help')}}">Help</a></li>
             <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
           </ul>
         </div>
