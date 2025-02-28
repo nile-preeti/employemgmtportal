@@ -5,11 +5,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Check-in/Check-out with Map</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NileTech">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('jquery.js') }}"></script>
     <script src="{{ asset('plugins/bootstrap/js/bootstrap.min.js') }}"></script>
+    <link rel="icon" type="image/jpeg" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
     <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('style.css') }}">
     <link rel="stylesheet" href="{{ asset('users/attendance_records.css') }}">
@@ -90,42 +96,35 @@
         .profile-image {
             border: 2px solid #4183d1;
         }
+        
+        #recordsList li:first-child{margin-top: 0px !important;}
+        .swal2-confirm{
+                background-color: #ffffff !important;
+                border: 1px solid #064086 !important;
+                color: #064086 !important;
+                padding: 9px 30px;
+                border-radius: 50px;
+            } 
 
-        #recordsList li:first-child {
-            margin-top: 0px !important;
-        }
+            .swal2-confirm:hover{background: #fff !important;}
 
-        .swal2-confirm {
-            background-color: #ffffff !important;
-            border: 1px solid #064086 !important;
-            color: #064086 !important;
-            padding: 9px 30px;
-            border-radius: 50px;
-        }
+            .swal2-cancel {    padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 50px;
+                background-color: #064086 !important;
+                color: white;
+                font-weight: 500;
+                display: inline-block;
+            }
+           
+            div#swal2-html-container {
+                color: #000;
+                font-weight: 500;
+            }
 
-        .swal2-confirm:hover {
-            background: #fff !important;
-        }
+            .swal2-popup.swal2-modal.swal2-show{padding: 40px;}
 
-        .swal2-cancel {
-            padding: 10px 20px;
-            font-size: 14px;
-            border: none;
-            border-radius: 50px;
-            background-color: #064086 !important;
-            color: white;
-            font-weight: 500;
-            display: inline-block;
-        }
-
-        div#swal2-html-container {
-            color: #000;
-            font-weight: 500;
-        }
-
-        .swal2-popup.swal2-modal.swal2-show {
-            padding: 40px;
-        }
     </style>
 </head>
 
@@ -141,7 +140,8 @@
 
                 <div class="dropdown text-end">
                     <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image">
+                    <img src="{{ auth()->user()->image ? asset('uploads/images/' . auth()->user()->image) : 'https://nileprojects.in/hrmodule/public/assets/images/image.png' }}" 
+                alt="mdo" width="40" height="40" class="rounded-circle profile-image">
                         <h6 class="m-0 p-0 text-light profile-name"> &nbsp; Profile</h6>
                     </a>
                     <ul class="dropdown-menu text-small" style="">
@@ -165,7 +165,7 @@
                     <form class="mr-3 position-relative">
                         <div class="form-group mb-0">
                             <input type="search" class="form-control" name="search"
-                                placeholder="Search by  name..." aria-controls="user-list-table" value="">
+                                placeholder="Search" aria-controls="user-list-table" value="">
                         </div>
                     </form>
                 </div>
@@ -303,6 +303,50 @@
             fetchEmployees(1, searchQuery);
         });
     </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            populateMonthFilter();
+            fetchAttendance(); // Load attendance data initially
+        });
+
+        function populateMonthFilter() {
+            const monthFilter = document.getElementById("monthFilter");
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
+            const currentYear = currentDate.getFullYear();
+
+            for (let i = 0; i < 12; i++) {
+                const date = new Date(currentYear, currentMonth - 1 - i, 1);
+                const monthValue = date.toISOString().slice(0, 7); // Format YYYY-MM
+                const monthText = date.toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const option = new Option(monthText, monthValue);
+                if (monthValue === `${currentYear}-${String(currentMonth).padStart(2, '0')}`) {
+                    option.selected = true;
+                }
+                monthFilter.appendChild(option);
+            }
+        }
+
+        function fetchAttendance(page = 1) {
+            const userId = 1; // Replace with dynamic user ID
+            const selectedMonth = document.getElementById("monthFilter").value;
+
+            fetch(`/fetch-attendance?id=${userId}&month=${selectedMonth}&page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayRecords(data.records);
+                        updatePagination(data.current_page, data.last_page);
+                    }
+                })
+                .catch(error => console.error("Error fetching attendance:", error));
+        }
+    </script>
     <script>
         function logout() {
 
@@ -325,12 +369,15 @@
                     // localStorage.removeItem('user')
                     $.get("{{ route('user.logout') }}", function(data) {
                         if (data.success) {
-                            Swal.fire("Success", "Logged out successfully", 'success').then((result) => {
+                            Swal.fire({
+                                title: "",
+                                text: "Logged out successfully", // Show only the text
+                                iconHtml: "", // Removes the default success icon
+                                showConfirmButton: true,
+                                confirmButtonText: "OK"
+                            }).then((result) => {
                                 if (result.value) {
-
                                     location.replace("{{ route('user.login') }}");
-
-
                                 }
                             });
                         }

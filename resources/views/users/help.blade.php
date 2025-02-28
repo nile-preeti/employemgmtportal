@@ -5,6 +5,11 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Check-in/Check-out with Map</title>
+        <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="NileTech">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
         <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,6 +18,12 @@
         <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('style.css') }}">
         <link rel="stylesheet" href="{{ asset('users/attendance_records.css') }}">
+        <!-- Standard Favicon -->
+        <link rel="shortcut icon" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" type="image/x-icon">
+
+        <!-- Android and iOS Home Screen Icons -->
+        <link rel="icon" type="image/png" sizes="192x192" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
         <!--     Fonts and icons     -->

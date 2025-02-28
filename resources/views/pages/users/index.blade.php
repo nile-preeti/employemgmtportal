@@ -12,117 +12,139 @@
                                                                                                               </div>
                                                                                                            </div> -->
                         <div class="iq-card-body">
-                            <div class="">
+                            <div class="iq-card-filter">
                                 <div class="row justify-content-between">
-                                    <div class="col-sm-12 col-md-4 col-lg-4">
-                                        <div id="user_list_datatable_info" class="dataTables_filter">
-                                            <form class="mr-3 position-relative">
-                                                <div class="form-group mb-0">
-                                                    <input type="search" class="form-control" name="search"
-                                                        placeholder="Search by  name..." aria-controls="user-list-table" value="{{$search}}">
+                                    <div class="col-sm-12 col-md-7 col-lg-7">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <select class="form-control" id="selectcountry"
+                                                        onchange="changeStatus(this.value)">
+                                                        <option value="">--Filter By Status--</option>
+                                                        <option value="1" @if (request()->has('status') && request('status') == 1) selected @endif>
+                                                            Active </option>
+                                                        <option value="0" @if (request()->has('status') && request('status') == 0) selected @endif>
+                                                            Inactive </option>
+                                                    </select>
                                                 </div>
-                                            </form>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="users-filter-search">
+                                                    <div id="user_list_datatable_info" class="dataTables_filter filter-search-info">
+                                                        <form class="position-relative">
+                                                            <div class="form-group mb-0">
+                                                                <input type="search" class="form-control" name="search"
+                                                                    placeholder="Search" aria-controls="user-list-table" value="{{$search}}">
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                    <div class="btn-reload"  onclick="window.location.href = window.location.origin + window.location.pathname;">
+                                                        <img src="{{ asset('reset.png') }}" height="20" alt="">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-1 col-lg-1">
-                                        <div class="btn-reload" style="cursor:pointer;padding-top:10px"
-                                            onclick="window.location.href = window.location.origin + window.location.pathname;"><img
-                                                src="{{ asset('reset.png') }}" height="20" alt=""></div>
-                                    </div>
-                                    <div class="col-sm-12 col-md-7 col-lg-7">
-                                        <div class=" d-flex">
-                                            <select class="form-control" id="selectcountry"
-                                                onchange="changeStatus(this.value)" style="width: 47%;">
-                                                <option value="">--Filter By Status--</option>
-                                                <option value="1" @if (request()->has('status') && request('status') == 1) selected @endif>
-                                                    Active </option>
-                                                <option value="0" @if (request()->has('status') && request('status') == 0) selected @endif>
-                                                    Inactive </option>
-                                            </select>
-
-                                            <button class="ml-4 px-2 btn btn-primary iq-bg-primary text-light rounded-pill "
-                                                onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
-                                                data-toggle="modal" data-target=".CreateModel" style="margin-right:10px;">Add Employee</button>
-
-                                                <button type="button" class="ml-2 px-2 btn btn-primary iq-bg-primary text-light rounded-pill " data-toggle="modal" data-target="#importExcelModal">
-                                                    Import Excel
-                                                </button>
-                                                <a href="{{ asset('/uploads/files/employees.xlsx') }}" class="ml-2 px-2 btn btn-primary iq-bg-primary text-light rounded-pill" download style="padding:11px;">
-                                                <i class="fa fa-download" style="padding:2px;"></i>
-                                                </a>
+                                    <div class="col-sm-12 col-md-5 col-lg-5">
+                                        <div class="row">
+                                            
+                                            <div class="col-md-5">
+                                                <div class="form-group">
+                                                    <button class="addemployeebtn"
+                                                        onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
+                                                        data-toggle="modal" data-target=".CreateModel">Add Employee</button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="form-group">
+                                                    <button type="button" class="ImportExcelbtn" data-toggle="modal" data-target="#importExcelModal">
+                                                        Import Excel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <a href="{{ asset('/uploads/files/employees.xlsx') }}" class="downloadbtn" 
+       data-bs-toggle="tooltip" data-bs-placement="top" title="Sample File">
+                                                    <i class="fa fa-download"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <table id="user-list-table" class="table table-striped table-borderless table-hover mt-4" role="grid"
-                                    aria-describedby="user-list-page-info">
-                                    <thead>
-                                        <tr>
-                                            <th>Emp Id</th>
-                                            <th> Name</th>
-                                            <th>email</th>
-                                            <th>Designation</th>
-                                            <th>Reporting Manager</th>
-                                            <th>Phone No.</th>
-                                            <th>Status</th>
-                                            <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse ($users as $item)
+                                <div class="table-responsive">
+                                    <table id="user-list-table" class="table table-striped table-borderless table-hover mt-4" role="grid"
+                                        aria-describedby="user-list-page-info">
+                                        <thead>
                                             <tr>
-                                                <td>{{$item->emp_id ?? 'N/A'}}</td>
-                                                <td class="d-flex align-items-center"><img class="avatar-40 rounded mr-2"
-                                                        src="{{ $item->image ? asset("uploads/images/$item->image") : 'https://nileprojects.in/hrmodule/public/assets/images/user/image.png' }}"
-                                                        alt="profile"> {{ $item->name }}</td>
-
-                                                <td>{{ $item->email }}</td>
-                                                <td>{{$item->designation ?? 'N/A'}}</td>
-                                                <td>{{ !empty($item->rep_manager) ? $item->rep_manager : 'N/A' }}</td>
-                                                <td>{{ !empty($item->phone) ? '+91' . $item->phone : 'N/A' }}</td>
-                                                <td><span
-                                                        class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
-                                                </td>
-
-                                                <td>
-                                                    <div class="flex align-items-center list-user-action">
-                                                        <a class="iq-bg-primary" data-toggle="modal"
-                                                            data-name="{{ $item->name ?? '' }}"
-                                                            data-status="{{ $item->status ?? '' }}"
-                                                            data-email="{{ $item->email ?? '' }}"
-                                                            data-designation="{{$item->designation}}"
-                                                            data-phone="{{$item->phone}}"
-                                                              data-emp="{{$item->emp_id}}"
-                                                            data-manager="{{$item->rep_manager}}"
-                                                            data-image="{{ $item->image ? asset("uploads/images/$item->image") : null }}"
-                                                            data-url="{{ route('admin.users.update', $item->id) }}"
-                                                            onclick="showData(this)" data-target="#EditModel"
-                                                            style="cursor: pointer"><i class="ri-pencil-fill"></i></a>
-                                                        {{-- delete  button --}}
-                                                        <a class="iq-bg-danger" data-id="{{ $item->id }}"
-                                                            style="cursor: pointer"
-                                                            data-url="{{ route('admin.users.destroy', $item->id) }}"
-                                                            onclick="deletePublic(this)"><i
-                                                                class="ri-delete-bin-7-line"></i></a>
-                                                        <a class="iq-bg-info" data-id="{{ $item->id }}"
-                                                            style="cursor: pointer"
-                                                            href="{{ route('admin.userAttendance', $item->id) }}"><i
-                                                                class="ri-eye-fill"></i></a>
-
-
-                                                    </div>
-
-                                                </td>
+                                                <th>Emp Id</th>
+                                                <th> Name</th>
+                                                <th>email</th>
+                                                <th>Designation</th>
+                                                <th>Reporting Manager</th>
+                                                <th>Phone No.</th>
+                                                <th>Status</th>
+                                                <th>Action &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
                                             </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="5" align="center">No records found</td>
-                                            </tr>
-                                        @endforelse
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($users as $item)
+                                                <tr>
+                                                    <td>{{$item->emp_id ?? 'N/A'}}</td>
+                                                    <td class="d-flex align-items-center"><img class="avatar-40 rounded mr-2"
+                                                            src="{{ $item->image ? asset("uploads/images/$item->image") : 'https://nileprojects.in/hrmodule/public/assets/images/user/image.png' }}"
+                                                            alt="profile"> {{ $item->name }}</td>
+
+                                                    <td>{{ $item->email }}</td>
+                                                    <td>{{$item->designation ?? 'N/A'}}</td>
+                                                    <td>{{ !empty($item->rep_manager) ? $item->rep_manager : 'N/A' }}</td>
+                                                    <td>{{ !empty($item->phone) ? '+91' . $item->phone : 'N/A' }}</td>
+                                                    <td><span
+                                                            class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
+                                                    </td>
+
+                                                    <td>
+                                                        <div class="flex align-items-center list-user-action">
+                                                            <a class="btn-edit" data-toggle="modal"
+                                                                data-name="{{ $item->name ?? '' }}"
+                                                                data-status="{{ $item->status ?? '' }}"
+                                                                data-email="{{ $item->email ?? '' }}"
+                                                                data-designation="{{$item->designation}}"
+                                                                data-phone="{{$item->phone}}"
+                                                                  data-emp="{{$item->emp_id}}"
+                                                                data-manager="{{$item->rep_manager}}"
+                                                                data-image="{{ $item->image ? asset("uploads/images/$item->image") : null }}"
+                                                                data-url="{{ route('admin.users.update', $item->id) }}"
+                                                                onclick="showData(this)" data-target="#EditModel"
+                                                                style="cursor: pointer"><i class="ri-pencil-fill"></i></a>
+                                                            {{-- delete  button --}}
+                                                            <a class="btn-delete" data-id="{{ $item->id }}"
+                                                                style="cursor: pointer"
+                                                                data-url="{{ route('admin.users.destroy', $item->id) }}"
+                                                                onclick="deletePublic(this)"><i
+                                                                    class="ri-delete-bin-7-line"></i></a>
+                                                            <a class="btn-view" data-id="{{ $item->id }}"
+                                                                style="cursor: pointer"
+                                                                href="{{ route('admin.userAttendance', $item->id) }}"><i
+                                                                    class="ri-eye-fill"></i></a>
+
+
+                                                        </div>
+
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="5" align="center">No records found</td>
+                                                </tr>
+                                            @endforelse
 
 
 
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div class="row justify-content-between mt-3">
                                 <div id="user-list-page-info" class="col-md-6">
@@ -200,58 +222,80 @@
                     </div>
                     <div class="modal-body">
 
-                        <div class="container-fluid">
-                            <div class="form-group">
-                                <label for="name">Name*</label>
-                                <input type="text" name="name" class="form-control" required>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Name*</label>
+                                    <input type="text" name="name" class="form-control" required>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="name">Emp Id*</label>
-                                <input type="text" name="emp_id" class="form-control" required pattern="\d{4}" minlength="4" maxlength="4" >
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Emp Id*</label>
+                                    <input type="text" name="emp_id" class="form-control" required pattern="\d{4}" minlength="4" maxlength="4" >
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="name">Email*</label>
-                                <input type="email" name="email" class="form-control" required>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Email*</label>
+                                    <input type="email" name="email" class="form-control" required>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="name">Designation*</label>
-                                <input type="text" name="designation" class="form-control" required>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Designation*</label>
+                                    <input type="text" name="designation" class="form-control" required>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="name">Phone Number*</label>
-                                <input type="text" name="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
-
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Phone Number*</label>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <select class="form-control">
+                                                <option>+91</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-9">
+                                            <input type="text" name="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-
-                            <div class="form-group">
-                                <label for="name">Reporting Manager</label>
-                                <input type="text" name="rep_manager" class="form-control">
-
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Reporting Manager</label>
+                                    <input type="text" name="rep_manager" class="form-control">
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="name">Password*</label>
-                                <input type="text" name="password" class="form-control" required>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Password*</label>
+                                    <input type="text" name="password" class="form-control" required>
+                                </div>
                             </div>
 
-                            {{-- <div class="form-group">
-                                <label for="name">Image</label>
-                            </div> --}}
-                            <input type="hidden" name="image" id="create_image" class="form-control">
-                            <div class="form-group">
-                                <div class="dropzone" id="myDropzone"></div>
-                            </div>
-                            <div class="form-group">
-                                <label for="name">Status</label>
-                                <select class="form-control" name="status">
-                                    <option value="1">Active </option>
-                                    <option value="0">Inactive </option>
-                                </select>
+                            <div class="col-md-12">
+                                {{-- <div class="form-group">
+                                    <label for="name">Image</label>
+                                </div> --}}
+                                <input type="hidden" name="image" id="create_image" class="form-control">
+                                <div class="form-group">
+                                    <div class="dropzone" id="myDropzone"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="name">Status</label>
+                                    <select class="form-control" name="status">
+                                        <option value="1">Active </option>
+                                        <option value="0">Inactive </option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -301,7 +345,16 @@
 
                             <div class="form-group">
                                 <label for="name">Phone No.*</label>
-                                <input type="text" name="phone" id="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
+                                <div class="row">
+                                    <div class="col-3">
+                                        <select class="form-control">
+                                            <option>+91</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-9">
+                                     <input type="text" name="phone" id="phone" class="form-control" required pattern="\d{10}" minlength="10" maxlength="10">
+                                     </div>
+                                </div>
 
                             </div>
 

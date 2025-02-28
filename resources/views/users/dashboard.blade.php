@@ -15,6 +15,14 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="{{ asset('jquery.js') }}"></script>
         <script src="{{ asset('plugins/bootstrap/js/bootstrap.min.js') }}"></script>
+        <link rel="icon" type="image/jpeg" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <!-- Standard Favicon -->
+        <link rel="shortcut icon" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" type="image/x-icon">
+
+        <!-- Android and iOS Home Screen Icons -->
+        <link rel="icon" type="image/png" sizes="192x192" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+
         <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('style.css') }}">
         <link rel="stylesheet" href="{{ asset('users/attendance_records.css') }}">
@@ -125,7 +133,8 @@
            
             <div class="dropdown text-end">
               <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image"> 
+                <img src="{{ auth()->user()->image ? asset('uploads/images/' . auth()->user()->image) : 'https://nileprojects.in/hrmodule/public/assets/images/image.png' }}" 
+                alt="mdo" width="40" height="40" class="rounded-circle profile-image">
                 <h6 class="m-0 p-0 text-light profile-name"> &nbsp; Profile</h6>
               </a>
               <ul class="dropdown-menu text-small" style="">
@@ -133,7 +142,6 @@
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{{route('user.help')}}">Help</a></li>
                 <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
-                
               </ul>
             </div>
           </div>
@@ -549,16 +557,20 @@ Swal.fire({
 
         // localStorage.removeItem('user')
         $.get("{{ route('user.logout') }}", function(data) {
-            if (data.success) {
-                Swal.fire("Success", "Logged out successfully", 'success').then((result) => {
-                    if (result.value) {
+          if (data.success) {
+              Swal.fire({
+                  title: "",
+                  text: "Logged out successfully", // Show only the text
+                  iconHtml: "", // Removes the default success icon
+                  showConfirmButton: true,
+                  confirmButtonText: "OK"
+              }).then((result) => {
+                  if (result.value) {
+                      location.replace("{{ route('user.login') }}");
+                  }
+              });
+          }
 
-                        location.replace("{{ route('user.login') }}");
-
-
-                    }
-                });
-            }
         })
 
 

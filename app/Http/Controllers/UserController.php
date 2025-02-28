@@ -15,8 +15,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use App\Imports\UsersImport;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Mail\EmployeeCredentialsMail;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Response;
 
 class UserController extends Controller
 {
@@ -29,14 +28,15 @@ class UserController extends Controller
             return $query->where("name", "LIKE", "%$keyword%")
                 ->orWhere("designation", "LIKE", "%$keyword%")
                 ->orWhere("email", "LIKE", "%$keyword%")
-                ->orWhere("phone", "LIKE", "%$keyword%");
+                ->orWhere("phone", "LIKE", "%$keyword%")
+                ->orWhere("rep_manager", "LIKE", "%$keyword%");
         })
             ->where("role_id", 2)
             ->when(request()->filled("status"), function ($query) {
                 return $query->where("status", request("status"));
             })
             ->orderBy("emp_id", "desc")
-            ->paginate(config("contant.paginatePerPage"));
+            ->paginate(15);
 
         // Fetch attendance counts
         foreach ($users as $user) {
@@ -88,11 +88,11 @@ class UserController extends Controller
         $user->emp_id = $request->emp_id;
         $user->rep_manager = $request->rep_manager;
 
+
         $user->status = $request->status;
 
         $user->password = Hash::make($request->password);
         $user->save();
-        // Mail::to($user->email)->send(new EmployeeCredentialsMail($user, $password));
 
         return response()->json(['success' => true, 'message' => "Employee Created Successfully"]);
     }
@@ -110,6 +110,7 @@ class UserController extends Controller
                 'required',
                 Rule::unique('users', 'emp_id')->ignore($id), // Allow the current user's emp_id
             ],
+            'rep_manager' => 'nullable',
         ]);
 
         $user =  User::find($id);
@@ -123,9 +124,7 @@ class UserController extends Controller
         $user->rep_manager = $request->rep_manager;
 
         if ($request->filled('password')) {
-            $newPassword = $request->password;
             $user->password = Hash::make($request->password);
-            //Mail::to($user->email)->send(new EmployeeCredentialsMail($user, $newPassword));
         }
 
         $user->save();
@@ -143,24 +142,148 @@ class UserController extends Controller
     }
     // user end routes
     public function userAttendance(Request $request, $id)
+    {
+        $month = request('month', date('m'));
+        $year = request('year', date('Y'));
+        $statusFilter = $request->query('status'); // Store status filter separately
+        $user = User::where('id', $id)->first();
+
+        // Fetch attendance records
+        $attendanceRecords = Attendance::where('user_id', $id)
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year)
+            ->when($statusFilter, function ($query) use ($statusFilter) {
+                return $query->where('status', $statusFilter);
+            })
+            ->get()
+            ->keyBy('date'); // Store by date for quick lookup
+
+        $title = "Employee Attendance Records";
+        $holidays = Holiday::whereMonth('date', $month)->whereYear('date', $year)->pluck('date')->toArray();
+
+        $allDays = [];
+        $startDate = Carbon::createFromDate($year, $month, 1);
+        $endDate = $startDate->copy()->endOfMonth();
+        $currentDate = Carbon::now()->format('Y-m-d');
+
+        for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+            $formattedDate = $date->format('Y-m-d');
+
+            if (isset($attendanceRecords[$formattedDate])) {
+                $record = $attendanceRecords[$formattedDate];
+
+                $checkInTime = !empty($record->check_in_time) ? strtotime($record->check_in_time) : null;
+                $checkOutTime = !empty($record->check_out_time) ? strtotime($record->check_out_time) : null;
+
+                if ($formattedDate === $currentDate) {
+                    // ✅ If today’s check-in is available, mark as "Present"
+                    $recordStatus = $checkInTime ? 'Present' : 'Absent';
+                } else {
+                    if (is_null($checkInTime) || is_null($checkOutTime)) {
+                        $recordStatus = 'Absent'; // No check-in or check-out means Absent
+                    } else {
+                        // Calculate worked hours
+                        $workedHours = ($checkOutTime - $checkInTime) / 3600; // Convert to hours
+
+                        if ($workedHours < 4.5) {
+                            $recordStatus = 'Absent';
+                        } elseif ($workedHours >= 4.5 && $workedHours < 9) {
+                            $recordStatus = 'Half-day';
+                        } else {
+                            $recordStatus = 'Present';
+                        }
+                    }
+                }
+
+                $allDays[] = [
+                    'date' => $formattedDate,
+                    'check_in_time' => $record->check_in_time,
+                    'check_in_full_address' => $record->check_in_full_address,
+                    'check_out_time' => $record->check_out_time,
+                    'check_out_full_address' => $record->check_out_full_address,
+                    'status' => $recordStatus
+                ];
+            } else {
+                if (in_array($formattedDate, $holidays)) {
+                    $recordStatus = 'Holiday';
+                } elseif ($date->isWeekend()) {
+                    $recordStatus = 'Weekly Off';
+                } elseif ($formattedDate > $currentDate) {
+                    $recordStatus = 'N/A';
+                } else {
+                    $recordStatus = 'Absent';
+                }
+
+                $allDays[] = [
+                    'date' => $formattedDate,
+                    'check_in_time' => null,
+                    'check_in_full_address' => null,
+                    'check_out_time' => null,
+                    'check_out_full_address' => null,
+                    'status' => $recordStatus
+                ];
+            }
+        }
+
+        // Apply status filter after processing
+        if ($statusFilter) {
+            $allDays = array_filter($allDays, function ($day) use ($statusFilter) {
+                return $day['status'] === $statusFilter;
+            });
+        }
+
+        // Paginate the data
+        $perPage = 15;
+        $currentPage = request()->get('page', 1);
+        $allDaysPaginated = new LengthAwarePaginator(
+            collect($allDays)->slice(($currentPage - 1) * $perPage, $perPage)->values(),
+            count($allDays),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        // Calculate attendance summary
+        $totalWorkingDays = collect($allDays)->filter(function ($day) {
+            return !in_array($day['status'], ['Holiday', 'Weekly Off', 'N/A']);
+        })->count();
+
+        $totalPresent = collect($allDays)->sum(function ($day) {
+            return $day['status'] === 'Present' ? 1 : ($day['status'] === 'Half-day' ? 0.5 : 0);
+        });
+
+        $totalHalfDay = collect($allDays)->where('status', 'Half-day')->count();
+        $totalAbsent = $totalWorkingDays - $totalPresent;
+
+        return view("pages.users.attendance", compact(
+            "allDaysPaginated",
+            "totalWorkingDays",
+            "totalPresent",
+            "totalHalfDay",
+            "totalAbsent",
+            "title",
+            'user',
+        ));
+    }
+
+
+
+
+    public function downloadAttendanceCsv(Request $request, $id)
 {
     $month = request('month', date('m'));
     $year = request('year', date('Y'));
-    $statusFilter = $request->query('status'); // Store status filter separately
-    $user = User::where('id',$id)->first();
-    // Fetch attendance records
+
+    $user = User::findOrFail($id);
+    
     $attendanceRecords = Attendance::where('user_id', $id)
         ->whereMonth('date', $month)
         ->whereYear('date', $year)
-        ->when($statusFilter, function ($query) use ($statusFilter) {
-            return $query->where('status', $statusFilter);
-        })
         ->get()
-        ->keyBy('date'); // Store by date for quick lookup
+        ->keyBy('date');
 
-    $title = "Employee Attendance Records";
     $holidays = Holiday::whereMonth('date', $month)->whereYear('date', $year)->pluck('date')->toArray();
-    
+
     $allDays = [];
     $startDate = Carbon::createFromDate($year, $month, 1);
     $endDate = $startDate->copy()->endOfMonth();
@@ -172,93 +295,70 @@ class UserController extends Controller
         if (isset($attendanceRecords[$formattedDate])) {
             $record = $attendanceRecords[$formattedDate];
 
-            $checkInTime = !empty($record->check_in_time) ? strtotime($record->check_in_time) : null;
-            $checkOutTime = !empty($record->check_out_time) ? strtotime($record->check_out_time) : null;
+            $checkInTime = !empty($record->check_in_time) ? $record->check_in_time : 'N/A';
+            $checkOutTime = !empty($record->check_out_time) ? $record->check_out_time : 'N/A';
+            $checkInAddress = !empty($record->check_in_full_address) ? $record->check_in_full_address : 'N/A';
+            $checkOutAddress = !empty($record->check_out_full_address) ? $record->check_out_full_address : 'N/A';
 
-            if (is_null($checkInTime) || is_null($checkOutTime)) {
-                $recordStatus = 'Absent'; // No check-in or check-out means Absent
+            $checkInTimestamp = !empty($record->check_in_time) ? strtotime($record->check_in_time) : null;
+            $checkOutTimestamp = !empty($record->check_out_time) ? strtotime($record->check_out_time) : null;
+
+            if ($formattedDate === $currentDate) {
+                $recordStatus = ($checkInTime !== 'N/A') ? 'Present' : 'Absent';
             } else {
-                // Calculate worked hours
-                $workedHours = ($checkOutTime - $checkInTime) / 3600; // Convert to hours
-
-                if ($workedHours < 4.5) {
+                if ($checkInTime === 'N/A' || $checkOutTime === 'N/A') {
                     $recordStatus = 'Absent';
-                } elseif ($workedHours >= 4.5 && $workedHours < 9) {
-                    $recordStatus = 'Half-day';
                 } else {
-                    $recordStatus = 'Present';
+                    $workedHours = ($checkOutTimestamp - $checkInTimestamp) / 3600;
+                    $recordStatus = ($workedHours < 4.5) ? 'Absent' : (($workedHours < 9) ? 'Half-day' : 'Present');
                 }
             }
 
             $allDays[] = [
-                'date' => $formattedDate,
-                'check_in_time' => $record->check_in_time,
-                'check_in_full_address' => $record->check_in_full_address,
-                'check_out_time' => $record->check_out_time,
-                'check_out_full_address' => $record->check_out_full_address,
-                'status' => $recordStatus
+                'Date' => $formattedDate,
+                'Check-In Time' => $checkInTime,
+                'Check-In Address' => $checkInAddress,
+                'Check-Out Time' => $checkOutTime,
+                'Check-Out Address' => $checkOutAddress,
+                'Status' => $recordStatus
             ];
         } else {
-            if (in_array($formattedDate, $holidays)) {
-                $recordStatus = 'Holiday';
-            } elseif ($date->isWeekend()) {
-                $recordStatus = 'Weekly Off';
-            } elseif ($formattedDate > $currentDate) {
-                $recordStatus = 'N/A';
-            } else {
-                $recordStatus = 'Absent';
-            }
+            $recordStatus = in_array($formattedDate, $holidays) ? 'Holiday' :
+                ($date->isWeekend() ? 'Weekly Off' :
+                ($formattedDate > $currentDate ? 'N/A' : 'Absent'));
 
             $allDays[] = [
-                'date' => $formattedDate,
-                'check_in_time' => null,
-                'check_in_full_address' => null,
-                'check_out_time' => null,
-                'check_out_full_address' => null,
-                'status' => $recordStatus
+                'Date' => $formattedDate,
+                'Check-In Time' => 'N/A',
+                'Check-In Address' => 'N/A',
+                'Check-Out Time' => 'N/A',
+                'Check-Out Address' => 'N/A',
+                'Status' => $recordStatus
             ];
         }
     }
 
-    // Apply status filter after processing
-    if ($statusFilter) {
-        $allDays = array_filter($allDays, function ($day) use ($statusFilter) {
-            return $day['status'] === $statusFilter;
-        });
+    // Define CSV headers
+    $fileName = "attendance_{$user->name}_{$month}_{$year}.csv";
+    $headers = [
+        "Content-type" => "text/csv",
+        "Content-Disposition" => "attachment; filename={$fileName}",
+        "Pragma" => "no-cache",
+        "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+        "Expires" => "0"
+    ];
+
+    // Create CSV content
+    $handle = fopen('php://output', 'w');
+    fputcsv($handle, array_keys($allDays[0])); // Add headers
+
+    foreach ($allDays as $row) {
+        fputcsv($handle, $row);
     }
 
-    // Paginate the data
-    $perPage = 15;
-    $currentPage = request()->get('page', 1);
-    $allDaysPaginated = new LengthAwarePaginator(
-        collect($allDays)->slice(($currentPage - 1) * $perPage, $perPage)->values(),
-        count($allDays),
-        $perPage,
-        $currentPage,
-        ['path' => request()->url(), 'query' => request()->query()]
-    );
+    fclose($handle);
 
-    // Calculate attendance summary
-    $totalWorkingDays = collect($allDays)->filter(function ($day) {
-        return !in_array($day['status'], ['Holiday', 'Weekly Off', 'N/A']);
-    })->count();
-
-    $totalPresent = collect($allDays)->sum(function ($day) {
-        return $day['status'] === 'Present' ? 1 : ($day['status'] === 'Half-day' ? 0.5 : 0);
-    });
-
-    $totalHalfDay = collect($allDays)->where('status', 'Half-day')->count();
-    $totalAbsent = $totalWorkingDays - $totalPresent;
-
-    return view("pages.users.attendance", compact(
-        "allDaysPaginated",
-        "totalWorkingDays",
-        "totalPresent",
-        "totalHalfDay",
-        "totalAbsent",
-        "title",
-        'user',
-    ));
+    return Response::make('', 200, $headers);
 }
 
 
@@ -332,14 +432,6 @@ class UserController extends Controller
         $user = Auth::user();
 
         return view("users.attendance_records", compact('user'));
-    }
-
-
-    public function help()
-    {
-        $user = Auth::user();
-
-        return view("users.help", compact('user'));
     }
 
     public function holidays()
@@ -468,6 +560,7 @@ class UserController extends Controller
     }
 
 
+
     public function changePassword(Request $request)
     {
         $request->validate([
@@ -479,5 +572,13 @@ class UserController extends Controller
         $user->save();
 
         return response()->json(['message' => 'Password updated successfully!']);
+    }
+
+
+    public function help()
+    {
+        $user = Auth::user();
+
+        return view("users.help", compact('user'));
     }
 }

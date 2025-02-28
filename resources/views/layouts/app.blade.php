@@ -66,12 +66,18 @@
                       
                         <li @if (Route::is('admin.users.index')) class="active" @endif>
                             <a href="{{ route('admin.users.index') }}" class="iq-waves-effect">
-                                <i class="ri-user-settings-line"></i><span>Employees Management</span></a>
+                                <i class="ri-user-settings-line"></i><span>Employee Management</span></a>
                         </li>
 
                         <li @if (Route::is('admin.holidayss.index')) class="active" @endif>
                             <a href="{{ route('admin.holidayss.index') }}" class="iq-waves-effect">
                             <i class="ri-calendar-event-line"></i><span>Holidays</span></a>
+                        </li>
+
+
+                        <li @if (Route::is('admin.reporting')) class="active" @endif>
+                            <a href="{{ route('admin.reporting') }}" class="iq-waves-effect">
+                            <i class="ri-bar-chart-line"></i><span>Reporting</span></a>
                         </li>
 
 

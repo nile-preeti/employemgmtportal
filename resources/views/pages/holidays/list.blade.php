@@ -12,26 +12,27 @@
                                                                                                               </div>
                                                                                                            </div> -->
                         <div class="iq-card-body">
-                            <div class="">
+                            <div class="iq-card-filter">
                                 <div class="row justify-content-between">
-                                    <div class="col-sm-12 col-md-6">
-                                        <div id="user_list_datatable_info" class="dataTables_filter">
-                                            <form class="mr-3 position-relative">
-                                                <div class="form-group mb-0">
-                                                    <input type="search" class="form-control" name="search"
-                                                        placeholder="Search by  name..." aria-controls="user-list-table">
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="btn-reload" style="cursor:pointer;padding-top:10px" onclick="window.location.href = window.location.origin + window.location.pathname;"><img src="{{ asset('reset.png') }}" height="20" alt="">
-                                        </div>
-                                    </div>
                                     <div class="col-sm-12 col-md-5">
-                                        <div class="user-list-files d-flex">
-
-                                            <a class="btn btn-primary iq-bg-primary text-light rounded-pill " onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
+                                        <div class="users-filter-search">
+                                            <div id="user_list_datatable_info" class="dataTables_filter filter-search-info">
+                                                <form class="position-relative">
+                                                    <div class="form-group mb-0">
+                                                       <input type="search" class="form-control" name="search"
+                                                        placeholder="Search by  name..." aria-controls="user-list-table">
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="btn-reload"  onclick="window.location.href = window.location.origin + window.location.pathname;">
+                                                <img src="{{ asset('reset.png') }}" height="20" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                   
+                                    <div class="col-sm-12 col-md-2">
+                                        <div class="form-group">
+                                            <a class="addemployeebtn" onclick='initializeDropzone("myDropzone", "{{ route('image-upload') }}", null)'
                                                 data-toggle="modal" data-target=".CreateModel" href="#">Add Holiday</a>
                                         </div>
                                     </div>
@@ -50,7 +51,7 @@
                                     <tbody>
                                         @forelse ($data as $key=> $item)
                                             <tr>
-                                                <td class="d-flex align-items-center">{{$key+1}}</td>
+                                                <td>{{$key+1}}</td>
 
                                                 <td>{{ $item->reason }}</td>
                                                
@@ -60,7 +61,7 @@
 
                                                 <td>
                                                     <div class="flex align-items-center list-user-action">
-                                                    <a class="iq-bg-primary" data-toggle="modal"
+                                                    <a class="btn-edit" data-toggle="modal"
    data-reason="{{ $item->reason ?? '' }}"
    data-date="{{ isset($item->date) ? \Carbon\Carbon::parse($item->date)->format('Y-m-d') : '' }}"
    data-url="{{ route('admin.holidayss.update', $item->id) }}"
@@ -69,7 +70,7 @@
    <i class="ri-pencil-fill"></i>
 </a>
                                                         {{-- delete  button --}}
-                                                        <a class="iq-bg-danger" data-id="{{ $item->id }}"
+                                                        <a class="btn-delete" data-id="{{ $item->id }}"
                                                             style="cursor: pointer"
                                                             data-url="{{ route('admin.holidayss.destroy', $item->id) }}"
                                                             onclick="deletePublic(this)"><i
@@ -452,7 +453,6 @@
             Swal.fire({
                 title: '',
                 text: title,
-                iconHtml: '<img src="{{ asset('assets/images/question.png') }}" height="25px">',
                 customClass: {
                     icon: 'no-border'
                 },

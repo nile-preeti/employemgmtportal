@@ -38,12 +38,17 @@ Route::group(['prefix' => 'admin', 'middleware' => 'auth:admin'], function () {
     Route::resource("users", UserController::class, ['as' => 'admin']);
     Route::get("users/attendance/{id}", [UserController::class, 'userAttendance'])->name("admin.userAttendance");
 
+
+    Route::get("reporting", [AdminController::class, 'reporting'])->name("admin.reporting");
+    Route::get('/reporting/download-csv', [AdminController::class, 'downloadCSV'])->name('reporting.download.csv');
+
     // Fix: Add 'as' => 'admin.' to holidays resource  
     Route::resource("holidayss", HolidayController::class, ['as' => 'admin']);
 
     Route::get('/download-logs', [AdminController::class, 'downloadLogs'])->name('download.logs');
     Route::post('/users/import', [UserController::class, 'import'])->name('admin.import');
     Route::get("logout", [AdminController::class, 'logout'])->name("admin.logout");
+    Route::get('/user/{id}/attendance/csv', [UserController::class, 'downloadAttendanceCsv'])->name('attendance.csv');
 });
 
 
@@ -76,6 +81,7 @@ Route::prefix('user')->as("user.")->group(function () {
 
         Route::get("emp-directory", [UserController::class, 'directory'])->name("directory");
         Route::get("all-emp-directory", [AjaxController::class, 'Employeedirectory'])->name("employee.directory");
+       
 
         Route::post('/change-password', [UserController::class, 'changePassword'])->name('change.password');
         Route::get("logout", [UserController::class, 'logout'])->name("logout");

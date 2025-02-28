@@ -5,8 +5,9 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
       <title>HR module</title>
+      <link rel="manifest" href="{{asset("manifest-login.json")}}">
       <!-- Favicon -->
-    
+      <link rel="icon" type="image/jpeg" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
       <link rel="shortcut icon" href="{{asset("assets/images/favicon.ico")}}" />
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="{{asset("assets/css/bootstrap.min.css")}}" />
@@ -22,8 +23,44 @@
         <script src="{{asset("assets/js/jquery.min.js")}}"></script>
         <script src="{{ asset('plugins/jquery-validation/jquery.validate.js') }}"></script>
         <style>
+             @media(max-width:767px) {
+            .user-profile{margin: 20px 0px; }
+            .res-fields {display: flex; justify-content: space-between;}
 
-        
+            }
+
+.swal2-confirm{
+                background-color: #0069ac !important;
+                border: 1px solid #064086 !important;
+                color: #fff !important;
+                padding: 9px 30px;
+                border-radius: 5px;
+            } 
+
+            .swal2-confirm:hover{background: #fff !important;}
+
+            .swal2-cancel {    padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 5px;
+                background-color: #c93126 !important;
+                color: white;
+                font-weight: 500;
+                display: inline-block;
+            }
+           
+            div#swal2-html-container {
+                color: #000;
+                font-weight: 500;
+            }
+
+            .swal2-popup.swal2-modal.swal2-show{padding: 40px;}
+
+            .res-fields label{color: #595959;}
+            .res-fields p{font-weight: 500; color: #000;}
+
+            .res-fields-1 label{color: #595959;}
+            .res-fields-1 p{font-weight: 500; color: #000;}
         </style>
    </head>
    <body>
@@ -149,27 +186,21 @@
 
                         success: function(response) {
                             if (response.status == "success") {
+                            Swal.fire({
+                                title: "",
+                                text: response.message, // Show only the message
+                                iconHtml: "", // Removes the default success icon
+                                showConfirmButton: true
+                            }).then(() => {
+                                if (response.redirect) {
+                                    window.location.href = response.redirect;
+                                }
+                            });
 
-                                Swal.fire({
-                                    title: 'Success',
-                                    text: response.message,
-                                    icon: 'success',
+                            return false;
+                        }
 
-                                }).then((result) => {
 
-                                    if (response.redirect) {
-                                        window.location.href = response.redirect;
-                                    }
-                                    // var url = $('#redirect_url').val();
-                                    // if (url !== undefined || url != null) {
-                                    //     window.location = url;
-                                    // } else {
-                                    //     location.reload(true);
-                                    // }
-                                })
-
-                                return false;
-                            }
 
                             if (response.status == "error") {
                                 Swal.fire(
