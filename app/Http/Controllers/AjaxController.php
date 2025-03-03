@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 class AjaxController extends Controller
 {
@@ -89,7 +90,7 @@ class AjaxController extends Controller
     
         return response()->json([
             'status' => 'success',
-            'message' => 'Check-in recorded successfully.',
+            'message' => 'Checked In successfully',
             'data' => [
                 'date' => $attendance->date,
                 'check_in_time' => date("H:i", strtotime($attendance->check_in_time)),
@@ -177,7 +178,7 @@ class AjaxController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Attendance updated successfully.',
+            'message' => 'Checked Out successfully',
             'data' => [
                 'check_in_time' => $checkInTime->format('H:i'),
                 'check_out_time' => $checkOutTime->format('H:i'),
@@ -190,92 +191,119 @@ class AjaxController extends Controller
 
    
     public function fetchAttendance(Request $request)
-    {
-        if ($request->has("id")) {
-            $id = $request->id;
-            $user = User::find($id);
-    
-            if ($user) {
-                // Get selected month & year from request, or default to current month & year
-                $selectedMonth = $request->input('month', now()->format('m'));
-                $selectedYear = $request->input('year', now()->format('Y'));
-    
-                $selectedDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1);
-                $daysInMonth = $selectedDate->daysInMonth; // Total days in month
-                $today = now()->format('Y-m-d'); // Get today's date in YYYY-MM-DD format
-    
-                // Fetch holidays in the selected month & year
-                $holidays = Holiday::whereYear('date', $selectedYear)
-                    ->whereMonth('date', $selectedMonth)
-                    ->pluck('date')
-                    ->toArray();
-    
-                // Fetch attendance records for the selected month & year
-                $attendances = Attendance::where("user_id", $id)
-                    ->whereYear("date", $selectedYear)
-                    ->whereMonth("date", $selectedMonth)
-                    ->orderBy("date", "asc")
-                    ->get()
-                    ->keyBy('date'); // Convert to associative array for easy lookup
-    
-                $records = [];
-    
-                for ($day = 1; $day <= $daysInMonth; $day++) {
-                    $date = $selectedYear . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
-                    $dayOfWeek = date('N', strtotime($date)); // 1 = Monday, 7 = Sunday
-    
-                    // Default status
-                    $status = "Absent";
-    
-                    if ($date > $today) {
-                        $status = "N/A"; // Future date
-                    } elseif (in_array($date, $holidays)) {
-                        $status = "Holiday";
-                    } elseif ($dayOfWeek == 6 || $dayOfWeek == 7) { // Saturday (6) & Sunday (7)
-                        $status = "Weekly Off";
-                    } elseif (isset($attendances[$date])) {
-                        $attendance = $attendances[$date];
-    
-                        $status = [
-                            "check_in_time" => !empty($attendance->check_in_time) ? date("H:i", strtotime($attendance->check_in_time)) : "N/A",
-                            "check_out_time" => !empty($attendance->check_out_time) ? date("H:i", strtotime($attendance->check_out_time)) : "N/A",
-                            "check_in_address" => $attendance->check_in_full_address ?? "N/A",
-                            "check_out_address" => $attendance->check_out_full_address ?? "N/A",
-                        ];
+{
+    if ($request->has("id")) {
+        $id = $request->id;
+        $user_id = Auth::user()->id;
+        $user = User::find($user_id);
+
+        if ($user) {
+            $selectedMonth = $request->input('month', now()->format('m'));
+            $selectedYear = $request->input('year', now()->format('Y'));
+
+            $selectedDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1);
+            $daysInMonth = $selectedDate->daysInMonth;
+            $today = now()->format('Y-m-d');
+
+            // Get holidays for the selected month
+            $holidays = Holiday::whereYear('date', $selectedYear)
+                ->whereMonth('date', $selectedMonth)
+                ->pluck('date')
+                ->toArray();
+
+            // Fetch user attendance for the selected month
+            $attendances = Attendance::where("user_id", $user_id)
+                ->whereYear("date", $selectedYear)
+                ->whereMonth("date", $selectedMonth)
+                ->orderBy("date", "asc")
+                ->get()
+                ->keyBy('date');
+
+            $records = [];
+
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $date = $selectedYear . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                $dayOfWeek = date('N', strtotime($date));
+
+                // Default Status
+                $status = ["key" => "absent", "label" => "Absent"]; 
+
+                if (in_array($date, $holidays)) {
+                    $status = ["key" => "holiday", "label" => "Holiday"];
+                } elseif ($date > $today) {
+                    $status = ["key" => "na", "label" => "N/A"];
+                } elseif ($dayOfWeek == 6 || $dayOfWeek == 7) { 
+                    $status = ["key" => "weekly_off", "label" => "Weekly Off"];
+                } elseif (isset($attendances[$date])) {
+                    $attendance = $attendances[$date];
+
+                    if (empty($attendance->check_in_time)) {
+                        $status = ["key" => "absent", "label" => "Absent"];
+                    } else {
+                        $checkInTime = strtotime($attendance->check_in_time);
+                        $checkOutTime = $attendance->check_out_time ? strtotime($attendance->check_out_time) : null;
+
+                        if ($date == $today) {
+                            $status = ["key" => "present", "label" => "Present"];
+                        } elseif ($date < $today && is_null($checkOutTime)) {
+                            $status = ["key" => "absent", "label" => "Absent"];
+                        } elseif (!is_null($checkOutTime)) {
+                            $workedHours = ($checkOutTime - $checkInTime) / 3600; // Convert seconds to hours
+
+                            if ($workedHours < 4.5) {
+                                $status = ["key" => "absent", "label" => "Absent"];
+                            } elseif ($workedHours >= 4.5 && $workedHours < 9) {
+                                $status = ["key" => "half_day", "label" => "Half Day"];
+                            } else {
+                                $status = ["key" => "present", "label" => "Present"];
+                            }
+                        } else {
+                            $status = ["key" => "absent", "label" => "Absent"];
+                        }
                     }
-    
-                    $records[] = [
-                        "date" => $date,
-                        "status" => $status
-                    ];
+
+                    $status["check_in_time"] = $attendance->check_in_time ? date("H:i", strtotime($attendance->check_in_time)) : "N/A";
+                    $status["check_out_time"] = $attendance->check_out_time ? date("H:i", strtotime($attendance->check_out_time)) : "N/A";
+                    $status["check_in_address"] = !empty($attendance->check_in_full_address) ? $attendance->check_in_full_address : "N/A";
+                    $status["check_out_address"] = !empty($attendance->check_out_full_address) ? $attendance->check_out_full_address : "N/A";
                 }
-    
-                // **Apply Pagination**
-                $perPage = 10;
-                $page = $request->input('page', 1);
-                $offset = ($page - 1) * $perPage;
-                $paginatedRecords = new LengthAwarePaginator(
-                    array_slice($records, $offset, $perPage),
-                    count($records),
-                    $perPage,
-                    $page
-                );
-    
-                return response()->json([
-                    'success' => true,
-                    'records' => $paginatedRecords->items(),
-                    'current_page' => $paginatedRecords->currentPage(),
-                    'last_page' => $paginatedRecords->lastPage(),
-                    'total' => $paginatedRecords->total(),
-                ]);
+
+                $records[] = [
+                    "date" => $date,
+                    "status" => $status,
+                    'id' => $id,
+                ];
             }
+
+            // **Pagination**
+            $perPage = 15;
+            $page = $request->input('page', 1);
+            $offset = ($page - 1) * $perPage;
+            $paginatedRecords = new LengthAwarePaginator(
+                array_slice($records, $offset, $perPage),
+                count($records),
+                $perPage,
+                $page
+            );
+
+            return response()->json([
+                'success' => true,
+                'records' => $paginatedRecords->items(),
+                'current_page' => $paginatedRecords->currentPage(),
+                'last_page' => $paginatedRecords->lastPage(),
+                'total' => $paginatedRecords->total(),
+            ]);
         }
-    
-        return response()->json(['success' => false, 'message' => 'User does not exist']);
     }
 
+    return response()->json(['success' => false, 'message' => 'User does not exist']);
+}
+
 
     
+
+    
+
 
 
     public function fetchAttendancetoday(Request $request)
@@ -310,13 +338,25 @@ class AjaxController extends Controller
 
     public function Employeedirectory(Request $request)
     {
-        $perPage = 10; // Number of records per page
+        $perPage = 15; // Number of records per page
         $page = $request->input('page', 1);
+        $search = $request->input('search');
 
-        $employees = User::where('role_id', 2)
+        $query = User::where('role_id', 2)
             ->where('status', 1)
-            ->select('id', 'name', 'email', 'emp_id', 'designation', 'phone')
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->select('id', 'name', 'email', 'emp_id', 'designation', 'phone','rep_manager')->orderBy('emp_id', 'desc');
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('emp_id', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('designation', 'LIKE', "%{$search}%")
+                ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $employees = $query->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,
@@ -326,8 +366,6 @@ class AjaxController extends Controller
             'total' => $employees->total(),
         ]);
     }
-
-
 
     
 }

@@ -5,13 +5,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Check-in/Check-out with Map</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NileTech">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('jquery.js') }}"></script>
     <script src="{{ asset('plugins/bootstrap/js/bootstrap.min.js') }}"></script>
+    <link rel="icon" type="image/jpeg" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
     <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('style.css') }}">
+    <!-- Standard Favicon -->
+    <link rel="shortcut icon" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" type="image/x-icon">
+
+    <!-- Android and iOS Home Screen Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
+
     <style>
         body {
             margin: 0;
@@ -33,8 +49,10 @@
 
         .info {
             text-align: center;
-            font-size: 13px;
+            font-size: 14px;
             margin-top: 5px;
+            color: #000;
+            font-weight: 500;
         }
 
         .header {
@@ -55,8 +73,45 @@
             border: 2px solid #4183d1;
         }
 
-        
+        .ic-arrow-left {
+            padding: 6px;
+            border-radius: 8px;
+            border: 2px solid #064086;
+            margin-right: 12px;
+            background: #fff;
+        }
 
+        .swal2-confirm {
+            background-color: #ffffff !important;
+            border: 1px solid #064086 !important;
+            color: #064086 !important;
+            padding: 9px 30px;
+            border-radius: 50px;
+        }
+
+        .swal2-confirm:hover {
+            background: #fff !important;
+        }
+
+        .swal2-cancel {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 50px;
+            background-color: #064086 !important;
+            color: white;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        div#swal2-html-container {
+            color: #000;
+            font-weight: 500;
+        }
+
+        .swal2-popup.swal2-modal.swal2-show {
+            padding: 40px;
+        }
     </style>
 </head>
 
@@ -65,24 +120,27 @@
         <div class="container-fluid">
             <div class="d-flex flex-wrap align-items-center justify-content-between">
 
-                <a href="#"> <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="logo card-img-absolute" alt="circle-image" height="50px"></a>
-
-
-
+                <a href="#"> <img src="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" class="logo card-img-absolute"
+                        alt="circle-image" height="50px"></a>
 
                 <div class="dropdown text-end">
-                    <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image">
-                        <h6 class="m-0 p-0 text-light"> &nbsp; Profile</h6>
+                    <a href="#"
+                        class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ auth()->user()->image ? asset('uploads/images/' . auth()->user()->image) : 'https://nileprojects.in/hrmodule/public/assets/images/image.png' }}" 
+                alt="mdo" width="40" height="40" class="rounded-circle profile-image">
+                        <h6 class="m-0 p-0 text-light profile-name"> &nbsp; Profile</h6>
                     </a>
                     <ul class="dropdown-menu text-small" style="">
-                        <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ route('user.profile') }}">Profile</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
+                        <li><a class="dropdown-item" href="{{route('user.help')}}">Help</a></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
                     </ul>
                 </div>
+
             </div>
         </div>
     </header>
@@ -117,62 +175,70 @@
             <div class="container">
 
                 <div class="hrmodule-punching-item">
+                    <div class="backbtn-ovrlp text-center"><a href="javascript:history.back()">
+                            <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg"
+                                class="ic-arrow-left"></a>
+                    </div>
+
                     <div id="map"></div>
                     <div class="controls">
                         <div class="hrmodule-punching-controls-box">
                             {{-- <div class="punching-controls-icon">
                                 <img src="{{ asset('watch-icon.svg') }}">
                         </div> --}}
-                        <div style="display: flex;justify-content:space-between">
-                            <!-- <div class="text-center"><a href="javascript:history.back()">
+                            <div style="display: flex;justify-content:center;">
+                                <!-- <div class="text-center"><a href="javascript:history.back()">
                                     <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
                             </div> -->
-                        </div>
-                        <div class="mb-4" style="display: flex;justify-content:space-between">
-                            <div class="d-flex align-items-center">
+                            </div>
+                            <div class="mb-3" style="display: flex;justify-content:center;">
+                                <!-- <div class="d-flex align-items-center">
                                 <div class="me-2"><a href="javascript:history.back()">
                                     <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg" class="ic-arrow-left"></a>
                                 </div>
+                            </div> -->
+                                <img src="https://nileprojects.in/hrmodule/public/assets/images/ic-clock.svg"
+                                    class="" height="130px"></a>
+                            </div>
+                            <div class="text-center"{{ date('M d , Y') }}></div>
+                            <div class="punching-time">
+                                <span id="hours">00</span>:<span id="minutes">00</span>:<span
+                                    id="seconds">00</span>
+                            </div>
+                            <div class="hrmodule-punching-item-action">
+                                <div class="punching-btn">
+                                    <button id="checkinBtn" class="checkinBtn">Check-in</button>
+                                    <div class="info" id="checkinInfo"></div>
+                                </div>
+                                <div class="punching-btn">
+                                    <button id="checkoutBtn" class="checkoutBtn" disabled>Check-out</button>
+                                    <div class="info" id="checkoutInfo"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="punching-time">
-                            <span id="hours">00</span>:<span id="minutes">00</span>:<span
-                                id="seconds">00</span>
-                        </div>
-                        <div class="hrmodule-punching-item-action">
-                            <div class="punching-btn">
-                                <button id="checkinBtn" class="checkinBtn">Check-in</button>
-                                <div class="info" id="checkinInfo"></div>
-                            </div>
-                            <div class="punching-btn">
-                                <button id="checkoutBtn" class="checkoutBtn" disabled>Check-out</button>
-                                <div class="info" id="checkoutInfo"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hrmodule-table-card d-none">
-                        {{-- <button class="btn-bl mb-2" id="fetchRecordsBtn">Fetch Records</button> --}}
-                        <div class="crm-card-table table-responsive">
-                            <table id="recordsTable" class="table">
-                                <thead>
-                                    <tr>
-                                        <th colspan="4">Date:{{ date('m-d-Y') }}</th>
-                                    </tr>
-                                    <tr>
-                                        <th>Action</th>
-                                        <th>Time</th>
-                                        <th>Address</th>
+                        <div class="hrmodule-table-card d-none">
+                            {{-- <button class="btn-bl mb-2" id="fetchRecordsBtn">Fetch Records</button> --}}
+                            <div class="crm-card-table table-responsive">
+                                <table id="recordsTable" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="4">Date:{{ date('m-d-Y') }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Time</th>
+                                            <th>Address</th>
 
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <script>
@@ -281,6 +347,11 @@
                 const checkinInfo = document.getElementById("checkinInfo");
                 const checkoutInfo = document.getElementById("checkoutInfo");
 
+                const startBreakBtn = document.getElementById("startBreakBtn");
+                const endBreakBtn = document.getElementById("endBreakBtn");
+                const startBreakInfo = document.getElementById("startBreakInfo");
+                const endBreakInfo = document.getElementById("endBreakInfo");
+
                 checkinBtn.addEventListener("click", async () => {
                     const address = await getAddressFromCoordinates(lat, lng);
 
@@ -325,7 +396,6 @@
                         Swal.fire("Error", result.message, "error");
                     }
                 });
-
                 // fetchRecordsBtn.addEventListener("click", async () => {
                 //     const result = await saveDataToPHP("{{ route('user.attendance.fetch') }}" + "?id=" +
                 //         user.id, {
@@ -397,9 +467,7 @@
             function fetchRecords() {
                 $.get("{{ route('user.attendance.fetch.today') }}" + "?id=" + user.id, function(data) {
                     if (data.success) {
-
                         if (data.records) {
-                            console.log('data',data);
 
 
                             //     displayRecords(data.records);
@@ -420,13 +488,14 @@
 
 
 
-
                             }
                             if (data.today.check_out_time) {
 
 
                                 const checkoutInfo = document.getElementById("checkoutInfo");
                                 // $("#checkoutBtn").attr("disabled", true);
+                                $("#startBreakBtn").attr("disabled", true);
+
                                 checkoutInfo.textContent = ` ${data.today.check_out_time}`;
 
                             }
@@ -461,12 +530,15 @@
                     // localStorage.removeItem('user')
                     $.get("{{ route('user.logout') }}", function(data) {
                         if (data.success) {
-                            Swal.fire("Success", "Logged out successfully", 'success').then((result) => {
+                            Swal.fire({
+                                title: "",
+                                text: "Logged out successfully", // Show only the text
+                                iconHtml: "", // Removes the default success icon
+                                showConfirmButton: true,
+                                confirmButtonText: "OK"
+                            }).then((result) => {
                                 if (result.value) {
-
                                     location.replace("{{ route('user.login') }}");
-
-
                                 }
                             });
                         }

@@ -23,8 +23,8 @@
                         <div class="iq-card-body">
                             <div class="d-flex d-flex align-items-center justify-content-between">
                                 <div>
-                                    <h6 class="text-dark font-weight-normal">Total Employee</h6>
-                                    <h2 class="text-dark font-weight-bold">{{ count($users) }}</h2>
+                                    <h6 class="text-dark font-weight-normal">Total Employees</h6>
+                                    <h2 class="text-dark font-weight-bold">{{ count($user) }}</h2>
                                 </div>
                                 <div class="rounded-circle iq-card-icon dark-icon-light iq-bg-primary "><i
                                         class="ri-group-line"></i></div>
@@ -46,7 +46,7 @@
                                     <h2 class="text-dark font-weight-bold">{{ $totalHolidays }}</h2>
                                 </div>
                                 <div class="rounded-circle iq-card-icon dark-icon-light iq-bg-primary "><i
-                                        class="ri-group-line"></i></div>
+                                        class="ri-calendar-line"></i></div>
                             </div>
                         </div>
 
@@ -60,19 +60,19 @@
                     <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
                         <div class="iq-card-header d-flex justify-content-between">
                             <div class="iq-header-title">
-                                <h4 class="card-title">Employee List</h4>
+                                <h4 class="card-title">Employees</h4>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
-                                <form class="position-relative mr-5">
+                                <form class="position-relative mr-1">
                                     <div class="form-group mb-0">
-                                    <a class="btn btn-primary iq-bg-primary text-light rounded-pill py-2 px-3" href="{{ route('download.logs') }}">
+                                    <a class="downloadbtn" href="{{ route('download.logs') }}">
                                         <i class="ri-download-line"></i> &nbsp; Download Logs
                                     </a>
                                     </div>
                                 </form>
 
-                                <div class="form-group mb-0">
-                                        <a class="btn btn-primary iq-bg-primary text-light mr-4 rounded-pill py-2 px-3" href="{{ route('admin.users.index') }}">
+                                <div class="form-group mr-2 mb-0">
+                                        <a class="downloadbtn" href="{{ route('admin.users.index') }}">
                                             &nbsp; View All</a>
                                     </div>
                                 <div class="todo-date d-flex mr-3">
@@ -105,6 +105,7 @@
                                             <th> Name</th>
                                             <th> Email</th>
                                             <th>Designation</th>
+                                            <th>Reporting Manager</th>
                                             <th>Phone No.</th>
                                             <th>Status</th>
                                         </tr>
@@ -123,10 +124,11 @@
                                                 <td>
                                                     {{ $item->designation ?? 'N/A' }}
                                                 </td>
+                                                <td>{{ !empty($item->rep_manager) ? $item->rep_manager : 'N/A' }}</td>
 
-                                                <td>{{$item->phone ?? 'N/A'}}</td>
+                                                <td>{{ !empty($item->phone) ? '+91' . $item->phone : 'N/A' }}</td>
                                                 <td><span
-                                                        class="badge dark-icon-light iq-bg-primary">{{ $item->status ? 'Active' : 'Inactive' }}</span>
+                                                        class="badge dark-icon-light iq-bg-success">{{ $item->status ? 'Active' : 'Inactive' }}</span>
                                                 </td>
 
                                             </tr>

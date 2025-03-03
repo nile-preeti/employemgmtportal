@@ -38,15 +38,14 @@
                         <div class="sign-in-from">
                            <div class="w-100">
                             <h1 class="mb-0 dark-signin">Admin Login</h1>
-                            <p>Enter your email address and password to access admin panel.</p>
                             <form class="mt-4" id="signin_form" enctype="multipart/form-data" action="{{route('signin.post')}}" method="POST">
                                 @csrf
                                 <div class="form-group">
                                     <label for="exampleInputEmail1">Email ID</label>
-                                    <input type="email" name="email" class="form-control mb-0" id="exampleInputEmail1" placeholder="Enter email">
+                                    <input type="email" name="email" class="form-control mb-0" id="exampleInputEmail1" placeholder="Email Id">
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputPassword1">Enter Your Password</label>
+                                    <label for="exampleInputPassword1">Password</label>
                                     <input type="password"  name="password" class="form-control mb-0" id="exampleInputPassword1" placeholder="Password">
                                 </div>
                                 <div class="d-inline-block w-100">
@@ -108,6 +107,15 @@
                         maxlength: 191,
 
                     },
+                },
+                messages: {
+                    email: {
+                        required: "Required",
+                        email: "Enter a valid email address"
+                    },
+                    password: {
+                        required: "Required"
+                    }
                 },
                 errorElement: "span",
                 errorPlacement: function(error, element) {

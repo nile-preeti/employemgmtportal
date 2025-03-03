@@ -5,11 +5,24 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Check-in/Check-out with Map</title>
+        <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="NileTech">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
         <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="{{ asset('jquery.js') }}"></script>
         <script src="{{ asset('plugins/bootstrap/js/bootstrap.min.js') }}"></script>
+        <link rel="icon" type="image/jpeg" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <!-- Standard Favicon -->
+        <link rel="shortcut icon" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg" type="image/x-icon">
+
+        <!-- Android and iOS Home Screen Icons -->
+        <link rel="icon" type="image/png" sizes="192x192" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://nileprojects.in/hrmodule/public/assets/images/nile-logo.jpg">
+
         <link rel="stylesheet" href="{{ asset('plugins/bootstrap/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('style.css') }}">
         <link rel="stylesheet" href="{{ asset('users/attendance_records.css') }}">
@@ -64,7 +77,32 @@
 
             .date-time-sec h2 {color: #000 !important;}
 
+            .swal2-confirm{
+                background-color: #ffffff !important;
+                border: 1px solid #064086 !important;
+                color: #064086 !important;
+                padding: 9px 30px;
+                border-radius: 50px;
+            } 
+
+            .swal2-confirm:hover{background: #fff !important;}
+
+            .swal2-cancel {    padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 50px;
+                background-color: #064086 !important;
+                color: white;
+                font-weight: 500;
+                display: inline-block;
+            }
            
+            div#swal2-html-container {
+                color: #000;
+                font-weight: 500;
+            }
+
+            .swal2-popup.swal2-modal.swal2-show{padding: 40px;}
            
 
         </style>
@@ -95,12 +133,14 @@
            
             <div class="dropdown text-end">
               <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://nileprojects.in/hrmodule/public/assets/images/image.png" alt="mdo" width="40" height="40" class="rounded-circle profile-image"> 
+                <img src="{{ auth()->user()->image ? asset('uploads/images/' . auth()->user()->image) : 'https://nileprojects.in/hrmodule/public/assets/images/image.png' }}" 
+                alt="mdo" width="40" height="40" class="rounded-circle profile-image">
                 <h6 class="m-0 p-0 text-light profile-name"> &nbsp; Profile</h6>
               </a>
               <ul class="dropdown-menu text-small" style="">
                 <li><a class="dropdown-item" href="{{route('user.profile')}}">Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{route('user.help')}}">Help</a></li>
                 <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
               </ul>
             </div>
@@ -111,11 +151,11 @@
 
 
         <div>
-            <div class="container-fluid">
+            <div class="container">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="text-dark mb-4 mt-4 pb-0"> Welcome {{ auth()->user()->name }}</h2>
+                            <h2 class="text-dark mb-5 mt-5 pb-0 text-capitalize"> Welcome {{ auth()->user()->name }}</h2>
                             <!-- <a href="#" class="btn btn-primary" onclick="logout()">Logout</a> -->
                         </div>
                     </div>
@@ -326,7 +366,7 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-6 col-md-6 col-lg-4 mb-3">
+                    <div class="col-sm-6 col-md-6 col-lg-4 mb-3 d-none">
                         <div class="mark-attendance-sec">
                         <a href="{{ route('user.holidays')}}">
                             <div class="bg-gradient-success card card-img-holder">
@@ -384,7 +424,7 @@
                                     <div class="col-8">
                                       <div class="numbers">
                                         <p class="text-light text-sm text-uppercase fw-medium">View Attendance</p>
-                                        <h3 class="text-light font-weight-bolder pb-0"> &nbsp; </h3>
+                                        <h6 class="text-light font-weight-bolder pb-0">P - {{$totalPresentDays}} | A - {{$totalAbsentDays}}</h6>
                                       </div>
                                     </div>
                                     <div class="col-4 text-end align-items-center d-flex justify-content-end">
@@ -408,7 +448,7 @@
                                   <div class="row">
                                     <div class="col-8">
                                       <div class="numbers">
-                                        <p class="text-light text-sm text-uppercase fw-medium">Directory</p>
+                                        <p class="text-light text-sm text-uppercase fw-medium">Employee Directory</p>
                                         <h3 class="text-light font-weight-bolder pb-0 "></h3>
                                       </div>
                                     </div>
@@ -469,7 +509,7 @@ Swal.fire({
     },
     type: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#3085d6',
+    confirmButtonColor: '#064086',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Yes'
 }).then((result) => {
@@ -517,16 +557,20 @@ Swal.fire({
 
         // localStorage.removeItem('user')
         $.get("{{ route('user.logout') }}", function(data) {
-            if (data.success) {
-                Swal.fire("Success", "Logged out successfully", 'success').then((result) => {
-                    if (result.value) {
+          if (data.success) {
+              Swal.fire({
+                  title: "",
+                  text: "Logged out successfully", // Show only the text
+                  iconHtml: "", // Removes the default success icon
+                  showConfirmButton: true,
+                  confirmButtonText: "OK"
+              }).then((result) => {
+                  if (result.value) {
+                      location.replace("{{ route('user.login') }}");
+                  }
+              });
+          }
 
-                        location.replace("{{ route('user.login') }}");
-
-
-                    }
-                });
-            }
         })
 
 
