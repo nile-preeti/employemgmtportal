@@ -17,12 +17,13 @@ class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $users = User::where("role_id", 2)->orderBy('emp_id', 'DESC')->get();
+        $user = User::where("role_id", 2)->orderBy('emp_id', 'DESC')->get();
+        $users = User::where("role_id", 2)->orderBy('emp_id', 'DESC')->take(10)->get();
         $totalHolidays = Holiday::whereYear('date', Carbon::now()->year)->count();
 
 
 
-        return view("pages.dashboard", compact("users", "totalHolidays"));
+        return view("pages.dashboard", compact("users", "totalHolidays","user"));
     }
 
 
@@ -210,6 +211,7 @@ class AdminController extends Controller
 
     public function reporting(Request $request)
     {
+        $title = "Reporting";
         $search = $request->input('search');
         $month = request('month', date('m'));
         $year = request('year', date('Y'));
@@ -236,7 +238,7 @@ class AdminController extends Controller
         $endDate = $startDate->copy()->endOfMonth();
         $today = Carbon::today();
 
-        // ✅ Calculate total working days (excluding weekends & holidays)
+        //  Calculate total working days (excluding weekends & holidays)
         $totalWorkingDays = 0;
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             $formattedDate = $date->format('Y-m-d');
@@ -254,7 +256,7 @@ class AdminController extends Controller
             $totalWorkingHours = 0;
             $daysConsidered = 0;
 
-            // ✅ If selected month is in the future, skip attendance calculations
+            //  If selected month is in the future, skip attendance calculations
             if ($startDate->gt($today)) {
                 $allUserAttendance[] = [
                     'id' => $user->id,
@@ -264,22 +266,22 @@ class AdminController extends Controller
                     'designation' => $user->designation,
                     'rep_manager' => $user->rep_manager,
                     'phone' => $user->phone,
-                    'total_working_days' => $totalWorkingDays, // ✅ Show for future months
-                    'total_present_days' => 0, // ✅ Always 0 for future months
-                    'total_absent_days' => 0,  // ✅ Always 0 for future months
-                    'total_working_hours' => 0, // ✅ Always 0 for future months
+                    'total_working_days' => $totalWorkingDays, 
+                    'total_present_days' => 0, 
+                    'total_absent_days' => 0,  
+                    'total_working_hours' => 0, 
                 ];
                 continue;
             }
 
-            // ✅ Fetch attendance records only if month is current or past
+            //  Fetch attendance records only if month is current or past
             $attendanceRecords = Attendance::where('user_id', $user->id)
                 ->whereMonth('date', $month)
                 ->whereYear('date', $year)
                 ->get()
                 ->keyBy('date');
 
-            // ✅ Loop through past & today’s working days
+            //  Loop through past & today’s working days
             for ($date = $startDate->copy(); $date->lte($endDate) && $date->lte($today); $date->addDay()) {
                 $formattedDate = $date->format('Y-m-d');
 
@@ -326,14 +328,14 @@ class AdminController extends Controller
                 'designation' => $user->designation,
                 'rep_manager' => $user->rep_manager,
                 'phone' => $user->phone,
-                'total_working_days' => $totalWorkingDays, // ✅ Show for future months
+                'total_working_days' => $totalWorkingDays, //  Show for future months
                 'total_present_days' => $totalPresent,
                 'total_absent_days' => $totalAbsent,
                 'total_working_hours' => round($totalWorkingHours),
             ];
         }
 
-        // ✅ Convert array to collection & paginate manually
+        //  Convert array to collection & paginate manually
         $perPage = 15;
         $currentPage = request()->get('page', 1);
         $allUserAttendanceCollection = new Collection($allUserAttendance);
@@ -351,6 +353,7 @@ class AdminController extends Controller
             'year' => $year,
             'totalWorkingDays' => $totalWorkingDays,
             'search' => $search,
+            'title' => $title,
         ]);
     }
 

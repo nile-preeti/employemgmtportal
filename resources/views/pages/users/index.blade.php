@@ -16,7 +16,7 @@
                                 <div class="row justify-content-between">
                                     <div class="col-sm-12 col-md-7 col-lg-7">
                                         <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <select class="form-control" id="selectcountry"
                                                         onchange="changeStatus(this.value)">
@@ -28,17 +28,23 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-7">
                                                 <div class="users-filter-search">
                                                     <div id="user_list_datatable_info" class="dataTables_filter filter-search-info">
-                                                        <form class="position-relative">
-                                                            <div class="form-group mb-0">
-                                                                <input type="search" class="form-control" name="search"
-                                                                    placeholder="Search" aria-controls="user-list-table" value="{{$search}}">
+                                                        <form class="position-relative d-flex" id="searchForm" style="gap: 10px">
+                                                            <!-- Search Input -->
+                                                            <div class="form-group mb-0" style="width: 80%">
+                                                                <input type="search" class="form-control" name="search" id="searchInput"
+                                                                    placeholder="Search" aria-controls="user-list-table" value="{{ request('search') }}">
                                                             </div>
+                                                            <!-- Search Button -->
+                                                            <button type="submit" class="" style="border: none; background: none; cursor: pointer;">
+                                                                <i class="fa fa-search" style="color:#0069ac;font-size:20px;border: 1px solid #0069ac;box-shadow: 0px 8px 13px 0px rgba(0, 0, 0, 0.05);padding: 10px 0px;text-align: center;border-radius: 5px;width: 45px;height:45px;"></i>
+                                                            </button>
                                                         </form>
                                                     </div>
-                                                    <div class="btn-reload"  onclick="window.location.href = window.location.origin + window.location.pathname;">
+                                                    <!-- Reset Button -->
+                                                    <div class="btn-reload" onclick="window.location.href = window.location.origin + window.location.pathname;">
                                                         <img src="{{ asset('reset.png') }}" height="20" alt="">
                                                     </div>
                                                 </div>
@@ -676,11 +682,10 @@
         }
 
         function deletePublic(ele) {
-            var title = ' you want to delete this employee ?';
+            var title = 'Are you sure, you want to delete this employee ?';
             Swal.fire({
                 title: '',
                 text: title,
-                iconHtml: '<img src="{{ asset('assets/images/question.png') }}" height="25px">',
                 customClass: {
                     icon: 'no-border'
                 },

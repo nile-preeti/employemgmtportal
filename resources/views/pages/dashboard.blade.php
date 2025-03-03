@@ -24,7 +24,7 @@
                             <div class="d-flex d-flex align-items-center justify-content-between">
                                 <div>
                                     <h6 class="text-dark font-weight-normal">Total Employees</h6>
-                                    <h2 class="text-dark font-weight-bold">{{ count($users) }}</h2>
+                                    <h2 class="text-dark font-weight-bold">{{ count($user) }}</h2>
                                 </div>
                                 <div class="rounded-circle iq-card-icon dark-icon-light iq-bg-primary "><i
                                         class="ri-group-line"></i></div>

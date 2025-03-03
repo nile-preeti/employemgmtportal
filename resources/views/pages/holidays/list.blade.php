@@ -14,21 +14,30 @@
                         <div class="iq-card-body">
                             <div class="iq-card-filter">
                                 <div class="row justify-content-between">
-                                    <div class="col-sm-12 col-md-5">
-                                        <div class="users-filter-search">
-                                            <div id="user_list_datatable_info" class="dataTables_filter filter-search-info">
-                                                <form class="position-relative">
-                                                    <div class="form-group mb-0">
-                                                       <input type="search" class="form-control" name="search"
-                                                        placeholder="Search by  name..." aria-controls="user-list-table">
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            <div class="btn-reload"  onclick="window.location.href = window.location.origin + window.location.pathname;">
-                                                <img src="{{ asset('reset.png') }}" height="20" alt="">
-                                            </div>
+                                <div class="col-sm-12 col-md-5">
+                                    <div class="users-filter-search">
+                                        <div id="user_list_datatable_info" class="dataTables_filter filter-search-info">
+                                            <form class="position-relative d-flex align-items-center" style="gap: 10px;">
+                                                <div class="form-group mb-0 flex-grow-1">
+                                                    <input type="search" class="form-control" name="search"
+                                                        placeholder="Search by name..." aria-controls="user-list-table" value="{{ request('search') }}">
+                                                </div>
+                                                <button type="submit" class="d-flex align-items-center justify-content-center"
+                                                    style="border: none; background: none; cursor: pointer; padding: 0;">
+                                                    <i class="fa fa-search"
+                                                        style="color:#0069ac;font-size:20px;border: 1px solid #0069ac;
+                                                        box-shadow: 0px 8px 13px 0px rgba(0, 0, 0, 0.05);
+                                                        padding: 10px;text-align: center;border-radius: 5px;width: 45px;height: 45px;">
+                                                    </i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <div class="btn-reload" onclick="window.location.href = window.location.origin + window.location.pathname;">
+                                            <img src="{{ asset('reset.png') }}" height="20" alt="">
                                         </div>
                                     </div>
+                                </div>
+
                                    
                                     <div class="col-sm-12 col-md-2">
                                         <div class="form-group">

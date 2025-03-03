@@ -74,6 +74,12 @@
                                             <div class="userlist-value" style="color:red"> {{ $totalAbsent }}</div>
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="userlist-card">
+                                            <div class="userlist-text">Total Working Hours:</div>
+                                            <div class="userlist-value" style="color:red"> {{ $totalWorkingHours }}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div> 
@@ -111,7 +117,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-sm-4 col-md-4">
+                                        <div class="col-sm-2 col-md-2">
                                             <div class="form-group">
                                                 <select class="form-control" id="selectMonth" onchange="filterByMonth(this.value)">
                                                     <option value="">--Filter By Month--</option>
@@ -123,6 +129,24 @@
                                                         <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}"
                                                             {{ $selectedMonth == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                                             {{ date("F", mktime(0, 0, 0, $i, 1)) }}
+                                                        </option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-sm-2 col-md-2">
+                                            <div class="form-group">
+                                                <select class="form-control" id="selectYear" onchange="filterByYear(this.value)">
+                                                    <option value="">--Filter By Year--</option>
+                                                    @php
+                                                        $currentYear = date('Y'); // Get current year
+                                                        $selectedYear = request('year', $currentYear); // Use requested year or default to current
+                                                    @endphp
+                                                    @for ($y = $currentYear - 5; $y <= $currentYear; $y++) <!-- Show last 5 years -->
+                                                        <option value="{{ $y }}" {{ $selectedYear == $y ? 'selected' : '' }}>
+                                                            {{ $y }}
                                                         </option>
                                                     @endfor
                                                 </select>
@@ -264,6 +288,10 @@
         var url = new URL(window.location.href);
         url.searchParams.set('month', month);
         window.location.href = url.href;
+    }
+    function filterByYear(year) {
+        let month = document.getElementById("selectMonth").value; // Get selected month
+        window.location.href = `?month=${month}&year=${year}`;
     }
 </script>
 <script>

@@ -80,7 +80,7 @@ class UserController extends Controller
 
         $user = new User();
         $user->role_id = 2;
-        $user->name = $request->name;
+        $user->name = ucwords(strtolower($request->name));
         $user->email = $request->email;
         $user->image = $request->image;
         $user->designation = $request->designation;
@@ -114,7 +114,7 @@ class UserController extends Controller
         ]);
 
         $user =  User::find($id);
-        $user->name = $request->name;
+        $user->name = ucwords(strtolower($request->name));
         $user->email = $request->email;
         $user->image = $request->image;
         $user->designation = $request->designation;
@@ -145,7 +145,9 @@ class UserController extends Controller
     {
         $month = request('month', date('m'));
         $year = request('year', date('Y'));
-        $statusFilter = $request->query('status'); // Store status filter separately
+        $statusFilter = $request->query('status'); // Status filter
+
+        // Get user details
         $user = User::where('id', $id)->first();
 
         // Fetch attendance records
@@ -162,10 +164,12 @@ class UserController extends Controller
         $holidays = Holiday::whereMonth('date', $month)->whereYear('date', $year)->pluck('date')->toArray();
 
         $allDays = [];
+        $totalWorkingHours = 0; // Initialize total working hours
         $startDate = Carbon::createFromDate($year, $month, 1);
         $endDate = $startDate->copy()->endOfMonth();
         $currentDate = Carbon::now()->format('Y-m-d');
 
+        // Loop through each day of the month
         for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
             $formattedDate = $date->format('Y-m-d');
 
@@ -174,13 +178,13 @@ class UserController extends Controller
 
                 $checkInTime = !empty($record->check_in_time) ? strtotime($record->check_in_time) : null;
                 $checkOutTime = !empty($record->check_out_time) ? strtotime($record->check_out_time) : null;
+                $workedHours = 0;
 
                 if ($formattedDate === $currentDate) {
-                    // ✅ If today’s check-in is available, mark as "Present"
                     $recordStatus = $checkInTime ? 'Present' : 'Absent';
                 } else {
                     if (is_null($checkInTime) || is_null($checkOutTime)) {
-                        $recordStatus = 'Absent'; // No check-in or check-out means Absent
+                        $recordStatus = 'Absent';
                     } else {
                         // Calculate worked hours
                         $workedHours = ($checkOutTime - $checkInTime) / 3600; // Convert to hours
@@ -195,13 +199,17 @@ class UserController extends Controller
                     }
                 }
 
+                // Add worked hours to total
+                $totalWorkingHours += $workedHours;
+
                 $allDays[] = [
                     'date' => $formattedDate,
                     'check_in_time' => $record->check_in_time,
                     'check_in_full_address' => $record->check_in_full_address,
                     'check_out_time' => $record->check_out_time,
                     'check_out_full_address' => $record->check_out_full_address,
-                    'status' => $recordStatus
+                    'status' => $recordStatus,
+                    'worked_hours' => round($workedHours, 2) // Round to 2 decimal places
                 ];
             } else {
                 if (in_array($formattedDate, $holidays)) {
@@ -220,7 +228,8 @@ class UserController extends Controller
                     'check_in_full_address' => null,
                     'check_out_time' => null,
                     'check_out_full_address' => null,
-                    'status' => $recordStatus
+                    'status' => $recordStatus,
+                    'worked_hours' => 0 // No work hours for absent/holiday/off days
                 ];
             }
         }
@@ -244,9 +253,17 @@ class UserController extends Controller
         );
 
         // Calculate attendance summary
-        $totalWorkingDays = collect($allDays)->filter(function ($day) {
-            return !in_array($day['status'], ['Holiday', 'Weekly Off', 'N/A']);
-        })->count();
+        $totalWorkingDays = 0;
+        $startDate = Carbon::createFromDate($year, $month, 1);
+        $endDate = $startDate->copy()->endOfMonth();
+
+        for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+            // Exclude weekends (Saturday & Sunday) and holidays
+            if (!$date->isWeekend() && !in_array($date->format('Y-m-d'), $holidays)) {
+                $totalWorkingDays++;
+            }
+        }
+
 
         $totalPresent = collect($allDays)->sum(function ($day) {
             return $day['status'] === 'Present' ? 1 : ($day['status'] === 'Half-day' ? 0.5 : 0);
@@ -261,6 +278,7 @@ class UserController extends Controller
             "totalPresent",
             "totalHalfDay",
             "totalAbsent",
+            "totalWorkingHours", // Pass total working hours
             "title",
             'user',
         ));

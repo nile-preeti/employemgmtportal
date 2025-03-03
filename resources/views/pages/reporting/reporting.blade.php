@@ -16,7 +16,7 @@
                             <div class="row justify-content-between">
                                 <div class="col-sm-12 col-md-7 col-lg-7">
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-2">
                                             <div class="form-group">
                                                 <select class="form-control" id="selectMonth" onchange="filterByMonth(this.value)">
                                                     <option value="">--Filter By Month--</option>
@@ -33,14 +33,33 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <div class="form-group">
+                                                <select class="form-control" id="selectYear" onchange="filterByYear(this.value)">
+                                                    <option value="">--Filter By Year--</option>
+                                                    @php
+                                                        $currentYear = date('Y'); // Get current year
+                                                        $selectedYear = request('year', $currentYear); // Use requested year or default to current
+                                                    @endphp
+                                                    @for ($y = $currentYear - 5; $y <= $currentYear; $y++) <!-- Show last 5 years -->
+                                                        <option value="{{ $y }}" {{ $selectedYear == $y ? 'selected' : '' }}>
+                                                            {{ $y }}
+                                                        </option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
                                         <div class="col-md-6">
                                             <div class="users-filter-search">
                                                 <div id="user_list_datatable_info" class="dataTables_filter filter-search-info">
-                                                    <form class="position-relative">
-                                                        <div class="form-group mb-0">
+                                                <form class="position-relative d-flex align-items-center" style="gap: 10px;">
+                                                        <div class="form-group mb-0  flex-grow-1">
                                                             <input type="search" class="form-control" name="search"
                                                                 placeholder="Search" aria-controls="user-list-table" value="{{$search}}">
                                                         </div>
+                                                        <button type="submit" class="d-flex align-items-center justify-content-center" style="border: none; background: none; cursor: pointer;">
+                                                                <i class="fa fa-search" style="color:#0069ac;font-size:20px;border: 1px solid #0069ac;box-shadow: 0px 8px 13px 0px rgba(0, 0, 0, 0.05);padding: 10px 0px;text-align: center;border-radius: 5px;width: 45px;height:45px;"></i>
+                                                            </button>
                                                     </form>
                                                 </div>
                                                 <div class="btn-reload" onclick="window.location.href = window.location.origin + window.location.pathname;">
@@ -177,6 +196,10 @@
         var url = new URL(window.location.href);
         url.searchParams.set('month', month);
         window.location.href = url.href;
+    }
+    function filterByYear(year) {
+        let month = document.getElementById("selectMonth").value; // Get selected month
+        window.location.href = `?month=${month}&year=${year}`;
     }
 </script>
 @endpush
