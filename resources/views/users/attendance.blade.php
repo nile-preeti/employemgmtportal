@@ -179,7 +179,7 @@
                             <img src="https://nileprojects.in/hrmodule/public/assets/images/arrow-left.svg"
                                 class="ic-arrow-left"></a>
                     </div>
-
+                    
                     <div id="map"></div>
                     <div class="controls">
                         <div class="hrmodule-punching-controls-box">
@@ -200,7 +200,7 @@
                                 <img src="https://nileprojects.in/hrmodule/public/assets/images/ic-clock.svg"
                                     class="" height="130px"></a>
                             </div>
-                            <div class="text-center"{{ date('M d , Y') }}></div>
+                            <p class="info"> {{ \Carbon\Carbon::now()->format('d M Y') }}</p>
                             <div class="punching-time">
                                 <span id="hours">00</span>:<span id="minutes">00</span>:<span
                                     id="seconds">00</span>
